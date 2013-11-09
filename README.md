@@ -1,11 +1,11 @@
-Example
--------
+blankgem
+--------
 
-  - [![Gem Version](https://badge.fury.io/rb/example.png)](https://rubygems.org/gems/example)
-  - [![Code Climate](https://codeclimate.com/github/krainboltgreene/example.png)](https://codeclimate.com/github/krainboltgreene/example)
-  - [![Build Status](https://travis-ci.org/krainboltgreene/example.png)](https://travis-ci.org/krainboltgreene/example)
-  - [![Dependency Status](https://gemnasium.com/krainboltgreene/example.png)](https://gemnasium.com/krainboltgreene/example)
-  - [![Coverage Status](https://coveralls.io/repos/krainboltgreene/example/badge.png?branch=master)](https://coveralls.io/r/krainboltgreene/example)
+  - [![Gem Version](https://badge.fury.io/rb/blankgem.png)](https://rubygems.org/gems/blankgem)
+  - [![Code Climate](https://codeclimate.com/github/krainboltgreene/blankgem.png)](https://codeclimate.com/github/krainboltgreene/blankgem)
+  - [![Build Status](https://travis-ci.org/krainboltgreene/blankgem.png)](https://travis-ci.org/krainboltgreene/blankgem)
+  - [![Dependency Status](https://gemnasium.com/krainboltgreene/blankgem.png)](https://gemnasium.com/krainboltgreene/blankgem)
+  - [![Coverage Status](https://coveralls.io/repos/krainboltgreene/blankgem/badge.png?branch=master)](https://coveralls.io/r/krainboltgreene/blankgem)
 
 
 TODO: Write a gem description
@@ -22,7 +22,7 @@ Installing
 
 Add this line to your application's Gemfile:
 
-    gem "example"
+    gem "blankgem"
 
 And then execute:
 
@@ -30,7 +30,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install example
+    $ gem install blankgem
 
 
 Contributing
