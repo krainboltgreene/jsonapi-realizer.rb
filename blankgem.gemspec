@@ -18,12 +18,12 @@ Gem::Specification.new do |spec|
   spec.test_files    = Dir["test/**/*", "spec/**/*"]
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency "mocha"
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "yard"
-  spec.add_development_dependency "kramdown"
-  spec.add_development_dependency "pry"
-  spec.add_development_dependency "coveralls"
+  spec.add_development_dependency "bundler", "~> 1.3"
+  spec.add_development_dependency "rspec", "~> 2.14"
+  spec.add_development_dependency "mocha", "~> 0.14"
+  spec.add_development_dependency "rake", "~> 10.1"
+  spec.add_development_dependency "yard", "~> 0.8"
+  spec.add_development_dependency "kramdown", "~> 1.2"
+  spec.add_development_dependency "pry", "~> 0.9"
+  spec.add_development_dependency "coveralls", "~> 0.7"
 end

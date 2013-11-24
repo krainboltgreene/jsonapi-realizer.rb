@@ -5,5 +5,4 @@ end
 
 require "pry"
 require "rspec"
-require "mocha/api"
 require "blankgem"
