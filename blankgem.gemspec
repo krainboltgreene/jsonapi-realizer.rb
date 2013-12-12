@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"]
-  spec.executables   = Dir["bin/**/*"].map! { |f| f.gsub(/bin\//, '') }
+  spec.executables   = Dir["bin/**/*"].map! { |f| f.gsub(/bin\//, "") }
   spec.test_files    = Dir["test/**/*", "spec/**/*"]
   spec.require_paths = ["lib"]
 
