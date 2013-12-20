@@ -1,2 +1,17 @@
+AllCops:
+  Excludes:
+    - benchmarks/**/*
+
 StringLiterals:
   EnforcedStyle: double_quotes
+SignalException:
+  Enabled: false
+CollectionMethods:
+  PreferredMethods:
+    collect: map
+    collect!: map!
+    inject: reduce
+    detect: find
+    find_all: select
+ReduceArguments:
+  Enabled: false
