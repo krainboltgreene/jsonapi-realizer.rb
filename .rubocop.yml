@@ -1,6 +1,6 @@
 AllCops:
   Excludes:
-    - benchmarks/**/*
+    - bench/**/*
 
 StringLiterals:
   EnforcedStyle: double_quotes
@@ -16,4 +16,8 @@ CollectionMethods:
 SingleLineBlockParams:
   Enabled: false
 OneLineConditional:
+  Enabled: false
+UnlessElse:
+  Enabled: false
+For:
   Enabled: false
