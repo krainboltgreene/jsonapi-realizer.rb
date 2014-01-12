@@ -23,7 +23,7 @@ Installing
 
 Add this line to your application's Gemfile:
 
-    gem "blankgem"
+    gem "blankgem", "~> 1.0"
 
 And then execute:
 
