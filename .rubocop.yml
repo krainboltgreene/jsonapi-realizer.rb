@@ -15,3 +15,5 @@ CollectionMethods:
     find_all: select
 ReduceArguments:
   Enabled: false
+OneLineConditional:
+  Enabled: false
