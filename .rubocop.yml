@@ -13,7 +13,7 @@ CollectionMethods:
     reduce: inject
     detect: find
     find_all: select
-ReduceArguments:
+SingleLineBlockParams:
   Enabled: false
 OneLineConditional:
   Enabled: false
