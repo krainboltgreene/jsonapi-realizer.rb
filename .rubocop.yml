@@ -10,7 +10,7 @@ CollectionMethods:
   PreferredMethods:
     collect: map
     collect!: map!
-    inject: reduce
+    reduce: inject
     detect: find
     find_all: select
 ReduceArguments:
