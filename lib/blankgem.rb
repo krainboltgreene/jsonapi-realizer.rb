@@ -1,6 +1,3 @@
-# This is the main namespace for your gem
 module Blankgem
-  # Your code goes here...
+  require_relative "blankgem/version"
 end
-
-require_relative "blankgem/version"
