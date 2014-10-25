@@ -48,10 +48,16 @@ Contributing
   5. Create new Pull Request
 
 
-Licensing
+Changelog
 =========
 
-Copyright (c) 2013 Kurtis Rainbolt-Greene
+  - 1.0.0: Initial release
+
+
+License
+=======
+
+Copyright (c) 2014 Kurtis Rainbolt-Greene
 
 MIT License
 
