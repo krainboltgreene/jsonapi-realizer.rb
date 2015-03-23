@@ -73,7 +73,7 @@ This Code of Conduct is adapted from the [Contributor Covenant](http:contributor
 License
 =======
 
-Copyright (c) 2014 Kurtis Rainbolt-Greene
+Copyright (c) 2014, 2015 Kurtis Rainbolt-Greene
 
 MIT License
 
