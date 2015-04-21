@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
 
   spec.files = Dir[File.join("lib", "**", "*")]
-  spec.executables = Dir[File.join("bin", "**". "*")].map! { |f| f.gsub(/bin\//, "") }
+  spec.executables = Dir[File.join("bin", "**", "*")].map! { |f| f.gsub(/bin\//, "") }
   spec.test_files = Dir[File.join("test", "**", "*"), File.join("spec", "**", "*")]
   spec.require_paths = ["lib"]
 
