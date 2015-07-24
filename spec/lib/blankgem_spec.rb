@@ -1,5 +1,5 @@
 require "spec_helper"
 
-describe Blankgem do
+RSpec.describe Blankgem do
 
 end
