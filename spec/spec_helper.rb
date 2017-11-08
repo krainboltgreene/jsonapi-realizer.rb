@@ -1,13 +1,8 @@
-require "codeclimate-test-reporter"
 require "pry"
 require "rspec"
-require "blankgem"
+require "blank-gem"
 
 RSpec.configure do |let|
-  let.before("suite") do
-    CodeClimate::TestReporter.start
-  end
-
   # Exit the spec after the first failure
   let.fail_fast = true
 
