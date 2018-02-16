@@ -1,8 +1,8 @@
-# blank-gem
+# jsonapi-marshal
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/blank-gem.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/blank-gem)
-  - [![Downloads](http://img.shields.io/gem/dtv/blank-gem.svg?style=flat-square)](https://rubygems.org/gems/blank-gem)
-  - [![Version](http://img.shields.io/gem/v/blank-gem.svg?style=flat-square)](https://rubygems.org/gems/blank-gem)
+  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-marshal.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-marshal)
+  - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-marshal.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-marshal)
+  - [![Version](http://img.shields.io/gem/v/jsonapi-marshal.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-marshal)
 
 
 TODO: Write a gem description
@@ -17,7 +17,7 @@ TODO: Write usage instructions here
 
 Add this line to your application's Gemfile:
 
-    gem "blank-gem", "1.0.0"
+    gem "jsonapi-marshal", "1.0.0"
 
 And then execute:
 
@@ -25,7 +25,7 @@ And then execute:
 
 Or install it yourself with:
 
-    $ gem install blank-gem
+    $ gem install jsonapi-marshal
 
 
 ## Contributing
