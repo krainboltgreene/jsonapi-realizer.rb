@@ -10,7 +10,41 @@ TODO: Write a gem description
 
 ## Using
 
-TODO: Write usage instructions here
+``` ruby
+class Photo
+  include ActiveModel::Model
+
+  attr_accessor :id
+  attr_accessor :title
+  attr_accessor :src
+  attr_accessor :photographer
+end
+
+class People
+  include ActiveModel::Model
+
+  attr_accessor :id
+  attr_accessor :name
+  attr_accessor :posts
+end
+```
+
+``` ruby
+class PhotoMarshal < JSONAPI::Marshal::Resource
+  represents :photos, class_name: "Photo"
+
+  has_one :photographer, as: :people
+
+  has :title
+  has :src
+end
+
+class PeopleMarshal < JSONAPI::Marshal::Resource
+  represents :people, class_name: "People"
+
+  has :name
+end
+```
 
 
 ## Installing
