@@ -1,97 +1,8 @@
 require "spec_helper"
 
-module JSONAPI
-  module Marshal
-    module Resource
-      extend ActiveSupport::Concern
-
-      def valid_attribute?(name, value)
-        configuration.fetch(:attributes, {}).fetch(name.to_sym)
-      end
-
-      def configuration
-        self.class.configuration
-      end
-
-      class_methods do
-        def represents(type, class_name:)
-          @configuration = JSONAPI::Marshal.register(self, class_name.constantize, type.to_s)
-        end
-
-        def has_one(relationship)
-          configuration[:relationships][name] = {name: relationship}
-        end
-
-        def attribute(name)
-          configuration[:attributes][name] = {name: name}
-        end
-
-        def configuration
-          @configuration
-        end
-      end
-    end
-
-    class Create
-      def initialize(payload:, headers:)
-        @data = payload.fetch("data")
-        @type = @data.fetch("type")
-        @resource = resource_class.new
-      end
-
-      def call
-        @result ||= model_class.new.tap do |model|
-          assign_attributes(model)
-          associate_relationships(model)
-        end
-      end
-
-      private def resource_class
-        JSONAPI::Marshal.mapping.fetch(@type).fetch(:resource_class)
-      end
-
-      private def model_class
-        JSONAPI::Marshal.mapping.fetch(@type).fetch(:model_class)
-      end
-
-      private def assign_attributes(model)
-        model.assign_attributes(attributes)
-      end
-
-      private def associate_relationships(model)
-        relationships.each do |name, value|
-          binding.pry
-          model.public_send()
-        end
-      end
-
-      private def relationships
-        @data.fetch("relationships", {}).select(&@resource.method(:valid_attribute?))
-      end
-
-      private def attributes
-        @data.fetch("attributes", {}).select(&@resource.method(:valid_attribute?))
-      end
-    end
-
-    def self.register(resource_class, model_class, type)
-      @mapping ||= {}
-      @mapping[type] = {
-        model_class: model_class,
-        type: type,
-        resource_class: resource_class,
-        attributes: {},
-        relationships: {}
-       }
-    end
-
-    def self.mapping
-      @mapping
-    end
-
-    def self.create(payload, headers:)
-      Create.new(payload: payload, headers: headers).call
-    end
+module InMemoryStore
+  def find_by_identifier(mapping, id)
+    binding.pry
   end
 end
 
@@ -105,19 +16,28 @@ class Photo
 end
 
 class People
+  include ActiveModel::Model
+
   attr_accessor :id
+  attr_accessor :name
   attr_accessor :posts
 end
 
-class PhotoMarshal
-  include JSONAPI::Marshal::Resource
+class PhotoMarshal < JSONAPI::Marshal::Resource
+  adapter InMemoryStore
 
   represents :photos, class_name: "Photo"
 
-  has_one :photographer
+  has_one :photographer, as: :people
 
-  attribute :title
-  attribute :src
+  has :title
+  has :src
+end
+
+class PeopleMarshal < JSONAPI::Marshal::Resource
+  represents :people, class_name: "People"
+
+  has :name
 end
 
 RSpec.describe JSONAPI::Marshal do
