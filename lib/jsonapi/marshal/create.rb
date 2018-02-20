@@ -13,6 +13,7 @@ module JSONAPI
 
       def call
         @resource.model.tap do |model|
+          model.assign_attributes(id: id) if id
           model.assign_attributes(attributes.select(&@resource.method(:valid_attribute?)))
           model.assign_attributes(relationships.select(&@resource.method(:valid_relationship?)).transform_values(&@resource.method(:as_relationship)))
           model.create

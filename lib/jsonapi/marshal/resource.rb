@@ -25,10 +25,12 @@ module JSONAPI
         configuration.relationships
       end
 
-      private def as_relationship(name, value)
-        find_by_identifier(
-          JSONAPI::Marshal.mapping.fetch(value.fetch("data").fetch("type")).model_class,
-          value.fetch("data").fetch("id")
+      private def as_relationship(value)
+        data = value.fetch("data")
+        mapping = JSONAPI::Marshal.mapping.fetch(data.fetch("type"))
+        mapping.resource_class.find_via_call(
+          mapping.model_class,
+          data.fetch("id")
         )
       end
 
@@ -50,6 +52,14 @@ module JSONAPI
 
       def self.represents(type, class_name:)
         @configuration = JSONAPI::Marshal.register(self, class_name.constantize, type.to_s)
+      end
+
+      def self.find_via(&finder)
+        @find_via_call = finder
+      end
+
+      def self.find_via_call(model_class, id)
+        @find_via_call.call(model_class, id)
       end
 
       def self.has_one(name, as: name)
