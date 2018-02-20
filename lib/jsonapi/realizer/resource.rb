@@ -1,5 +1,5 @@
 module JSONAPI
-  module Marshal
+  module Realizer
     class Resource
       extend ActiveSupport::Concern
 
@@ -27,7 +27,7 @@ module JSONAPI
 
       private def as_relationship(value)
         data = value.fetch("data")
-        mapping = JSONAPI::Marshal.mapping.fetch(data.fetch("type"))
+        mapping = JSONAPI::Realizer.mapping.fetch(data.fetch("type"))
         mapping.resource_class.find_via_call(
           mapping.model_class,
           data.fetch("id")
@@ -51,7 +51,7 @@ module JSONAPI
       end
 
       def self.represents(type, class_name:)
-        @configuration = JSONAPI::Marshal.register(self, class_name.constantize, type.to_s)
+        @configuration = JSONAPI::Realizer.register(self, class_name.constantize, type.to_s)
       end
 
       def self.find_via(&finder)

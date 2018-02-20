@@ -1,8 +1,8 @@
-# jsonapi-marshal
+# jsonapi-realizer
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-marshal.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-marshal)
-  - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-marshal.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-marshal)
-  - [![Version](http://img.shields.io/gem/v/jsonapi-marshal.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-marshal)
+  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-realizer.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-realizer)
+  - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
+  - [![Version](http://img.shields.io/gem/v/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
 
 
 This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into data models for your business logic.
@@ -19,10 +19,10 @@ class Profile < ApplicationRecord
   has_many :photos
 end
 
-class PhotoMarshal
-  include JSONAPI::Marshal::Resource
+class PhotoRealizer
+  include JSONAPI::Realizer::Resource
 
-  adapter JSONAPI::Marshal::ActiveRecord
+  adapter JSONAPI::Realizer::ActiveRecord
 
   represents :photos, class_name: "Photo"
 
@@ -32,10 +32,10 @@ class PhotoMarshal
   has :src
 end
 
-class ProfileMarshal
-  include JSONAPI::Marshal::Resource
+class ProfileRealizer
+  include JSONAPI::Realizer::Resource
 
-  adapter JSONAPI::Marshal::ActiveRecord
+  adapter JSONAPI::Realizer::ActiveRecord
 
   represents :profiles, class_name: "Profile"
 
@@ -48,7 +48,7 @@ end
 ``` ruby
 class PhotosController < ApplicationController
   def create
-    @record = JSONAPI::Marshal.create(params, headers: request.headers)
+    @record = JSONAPI::Realizer.create(params, headers: request.headers)
   end
 end
 ```
@@ -58,7 +58,7 @@ end
 
 Add this line to your application's Gemfile:
 
-    gem "jsonapi-marshal", "1.0.0"
+    gem "jsonapi-realizer", "1.0.0"
 
 And then execute:
 
@@ -66,7 +66,7 @@ And then execute:
 
 Or install it yourself with:
 
-    $ gem install jsonapi-marshal
+    $ gem install jsonapi-realizer
 
 
 ## Contributing

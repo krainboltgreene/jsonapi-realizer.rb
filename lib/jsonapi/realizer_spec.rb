@@ -44,7 +44,7 @@ class People
   attr_accessor :updated_at
 end
 
-class PhotoMarshal < JSONAPI::Marshal::Resource
+class PhotoRealizer < JSONAPI::Realizer::Resource
   represents :photos, class_name: "Photo"
 
   find_via do |model_class, id|
@@ -57,7 +57,7 @@ class PhotoMarshal < JSONAPI::Marshal::Resource
   has :src
 end
 
-class PeopleMarshal < JSONAPI::Marshal::Resource
+class PeopleRealizer < JSONAPI::Realizer::Resource
   represents :people, class_name: "People"
 
   find_via do |model_class, id|
@@ -67,7 +67,7 @@ class PeopleMarshal < JSONAPI::Marshal::Resource
   has :name
 end
 
-RSpec.describe JSONAPI::Marshal do
+RSpec.describe JSONAPI::Realizer do
   it "on create generates a model with a relationship and a client id" do
     People::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
       id: "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9",
@@ -92,7 +92,7 @@ RSpec.describe JSONAPI::Marshal do
         }
       }
     }
-    model = JSONAPI::Marshal.create(params, headers: headers)
+    model = JSONAPI::Realizer.create(params, headers: headers)
 
     expect(model).to be_a_kind_of(Photo)
     expect(model).to have_attributes(title: "Ember Hamster", src: "http://example.com/images/productivity.png", updated_at: a_kind_of(Time))

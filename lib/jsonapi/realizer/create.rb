@@ -1,5 +1,5 @@
 module JSONAPI
-  module Marshal
+  module Realizer
     class Create
       attr_reader :type
       attr_reader :data
@@ -21,7 +21,7 @@ module JSONAPI
       end
 
       private def resource_class
-        JSONAPI::Marshal.mapping.fetch(@type).resource_class
+        JSONAPI::Realizer.mapping.fetch(@type).resource_class
       end
 
       private def relationships

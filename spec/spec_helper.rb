@@ -1,6 +1,6 @@
 require "pry"
 require "rspec"
-require "jsonapi-marshal"
+require "jsonapi-realizer"
 require "active_model"
 
 RSpec.configure do |let|
@@ -8,7 +8,7 @@ RSpec.configure do |let|
   let.fail_fast = true
 
   # Only run a specific file, using the ENV variable
-  # Example: FILE=lib/jsonapi/marshal/version_spec.rb bundle exec rake spec
+  # Example: FILE=lib/jsonapi/realizer/version_spec.rb bundle exec rake spec
   let.pattern = ENV["FILE"]
 
   # Show the slowest examples in the suite

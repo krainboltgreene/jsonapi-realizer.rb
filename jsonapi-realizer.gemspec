@@ -1,14 +1,14 @@
 $:.push File.expand_path(File.join("..", "lib"), __FILE__)
-require "jsonapi-marshal"
+require "jsonapi-realizer"
 
 Gem::Specification.new do |spec|
-  spec.name = "jsonapi-marshal"
-  spec.version = JSONAPI::Marshal::VERSION
+  spec.name = "jsonapi-realizer"
+  spec.version = JSONAPI::Realizer::VERSION
   spec.authors = ["Kurtis Rainbolt-Greene"]
   spec.email = ["kurtis@rainbolt-greene.online"]
   spec.summary = %q{A way to take json:api requests and turn them into models}
   spec.description = spec.summary
-  spec.homepage = "http://krainboltgreene.github.io/jsonapi-marshal"
+  spec.homepage = "http://krainboltgreene.github.io/jsonapi-realizer"
   spec.license = "ISC"
 
   spec.files = Dir[File.join("lib", "**", "*"), "LICENSE", "README.md", "Rakefile"]

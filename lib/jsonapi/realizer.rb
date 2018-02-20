@@ -2,10 +2,10 @@ require "active_support/concern"
 require "ostruct"
 
 module JSONAPI
-  module Marshal
-    require_relative "marshal/version"
-    require_relative "marshal/create"
-    require_relative "marshal/resource"
+  module Realizer
+    require_relative "realizer/version"
+    require_relative "realizer/create"
+    require_relative "realizer/resource"
 
     def self.register(resource_class, model_class, type)
       @mapping ||= {}
