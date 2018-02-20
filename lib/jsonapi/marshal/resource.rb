@@ -91,7 +91,11 @@ module JSONAPI
       end
 
       def self.configuration
-        @configuration
+        if @configuration
+          @configuration
+        else
+          raise ArgumentError, "you need to have the resource configured"
+        end
       end
     end
   end
