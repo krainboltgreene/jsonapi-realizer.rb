@@ -8,11 +8,15 @@ module JSONAPI
       def initialize(payload:, headers:)
         @data = payload.fetch("data")
         @type = @data.fetch("type")
-        @resource = resource_class.new(attributes: attributes, relationships: relationships)
+        @resource = resource_class.new(resource_class.model_class.new)
       end
 
       def call
-        @resource.model
+        @resource.model.tap do |model|
+          model.assign_attributes(attributes.select(&@resource.method(:valid_attribute?)))
+          model.assign_attributes(relationships.select(&@resource.method(:valid_relationship?)).transform_values(&@resource.method(:as_relationship)))
+          model.create
+        end
       end
 
       private def resource_class
@@ -21,6 +25,10 @@ module JSONAPI
 
       private def relationships
         data.fetch("relationships", {})
+      end
+
+      private def id
+        data.fetch("id", nil)
       end
 
       private def attributes

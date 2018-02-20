@@ -3,11 +3,10 @@ module JSONAPI
     class Resource
       extend ActiveSupport::Concern
 
-      def initialize(attributes:, relationships:)
-        @model = model_class.new.tap do |model|
-          model.assign_attributes(attributes.select(&method(:valid_attribute?)))
-          model.assign_attributes(relationships.select(&method(:valid_relationship?)).map(&method(:as_relationship)))
-        end
+      attr_reader :model
+
+      def initialize(model)
+        @model = model
       end
 
       def relationship(name)
@@ -16,14 +15,6 @@ module JSONAPI
 
       def attribute(name)
         relationships.public_send(name.to_sym)
-      end
-
-      private def valid_attribute?(name, value)
-        attributes.respond_to?(name.to_sym)
-      end
-
-      private def valid_relationship?(name, value)
-        relationships.respond_to?(name.to_sym)
       end
 
       private def attributes
@@ -49,8 +40,12 @@ module JSONAPI
         self.class.configuration
       end
 
-      def self.adapter(module)
-        include(module)
+      def valid_attribute?(name, value)
+        attributes.respond_to?(name.to_sym)
+      end
+
+      def valid_relationship?(name, value)
+        relationships.respond_to?(name.to_sym)
       end
 
       def self.represents(type, class_name:)
