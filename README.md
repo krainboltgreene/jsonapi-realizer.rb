@@ -5,7 +5,7 @@
   - [![Version](http://img.shields.io/gem/v/jsonapi-marshal.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-marshal)
 
 
-TODO: Write a gem description
+This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into data models for your business logic.
 
 
 ## Using
