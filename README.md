@@ -11,38 +11,45 @@ This library handles incoming [json:api](https://www.jsonapi.org) payloads and t
 ## Using
 
 ``` ruby
-class Photo
-  include ActiveModel::Model
-
-  attr_accessor :id
-  attr_accessor :title
-  attr_accessor :src
-  attr_accessor :photographer
+class Photo < ApplicationRecord
+  belongs_to :photographer, class_name: "Profile"
 end
 
-class People
-  include ActiveModel::Model
-
-  attr_accessor :id
-  attr_accessor :name
-  attr_accessor :posts
+class Profile < ApplicationRecord
+  has_many :photos
 end
-```
 
-``` ruby
-class PhotoMarshal < JSONAPI::Marshal::Resource
+class PhotoMarshal
+  include JSONAPI::Marshal::Resource
+
+  adapter JSONAPI::Marshal::ActiveRecord
+
   represents :photos, class_name: "Photo"
 
-  has_one :photographer, as: :people
+  has_one :photographer, as: :profiles
 
   has :title
   has :src
 end
 
-class PeopleMarshal < JSONAPI::Marshal::Resource
-  represents :people, class_name: "People"
+class ProfileMarshal
+  include JSONAPI::Marshal::Resource
+
+  adapter JSONAPI::Marshal::ActiveRecord
+
+  represents :profiles, class_name: "Profile"
+
+  has_many :photos, as: :photos
 
   has :name
+end
+```
+
+``` ruby
+class PhotosController < ApplicationController
+  def create
+    @record = JSONAPI::Marshal.create(params, headers: request.headers)
+  end
 end
 ```
 
