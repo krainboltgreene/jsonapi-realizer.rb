@@ -1,5 +1,5 @@
-require "active_support/concern"
 require "ostruct"
+require "active_support/concern"
 
 module JSONAPI
   module Realizer
