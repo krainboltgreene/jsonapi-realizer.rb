@@ -2,8 +2,9 @@ require "spec_helper"
 
 RSpec.describe JSONAPI::Realizer::Adapter do
   describe ".adapt" do
-    context "for a mapped alias" do
-
+    context "for the active_record mapped alias" do
+      it "defines the find_via_call instance variable as a anonymous function"
+      it "defines the find_via_call instance variable as a anonymous function"
     end
 
     context "for a mapped alias that doesn't exist" do
