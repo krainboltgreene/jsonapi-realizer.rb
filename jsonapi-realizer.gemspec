@@ -1,5 +1,6 @@
-$:.push File.expand_path(File.join("..", "lib"), __FILE__)
-require "jsonapi-realizer"
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "jsonapi/realizer/version"
 
 Gem::Specification.new do |spec|
   spec.name = "jsonapi-realizer"
@@ -12,10 +13,11 @@ Gem::Specification.new do |spec|
   spec.license = "ISC"
 
   spec.files = Dir[File.join("lib", "**", "*"), "LICENSE", "README.md", "Rakefile"]
-  spec.executables = Dir[File.join("bin", "**", "*")].map { |f| f.gsub(/bin\//, "") }
+  spec.bindir = "exe"
+  spec.executables = = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.15"
+  spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rspec", "~> 3.7"
   spec.add_development_dependency "rake", "~> 12.2"
   spec.add_development_dependency "pry", "~> 0.11"

@@ -65,6 +65,12 @@ class PeopleRealizer < JSONAPI::Realizer::Resource
 end
 
 RSpec.configure do |let|
+  # Enable flags like --only-failures and --next-failure
+  let.example_status_persistence_file_path = ".rspec_status"
+
+  # Disable RSpec exposing methods globally on `Module` and `main`
+  let.disable_monkey_patching!
+
   # Exit the spec after the first failure
   let.fail_fast = true
 
