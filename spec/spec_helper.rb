@@ -3,6 +3,67 @@ require "rspec"
 require "jsonapi-realizer"
 require "active_model"
 
+module MemoryStore
+  extend ActiveSupport::Concern
+
+  def create
+    assign_attributes(updated_at: Time.now, id: id || SecureRandom.uuid)
+    self.class.const_get("STORE")[id] = self.class.const_get("ATTRIBUTES").inject({}) do |hash, key|
+      hash.merge({ key => self.send(key) })
+    end
+  end
+
+  class_methods do
+    def fetch(id)
+      self.new(self.const_get("STORE").fetch(id))
+    end
+  end
+end
+
+class Photo
+  STORE = {}
+  ATTRIBUTES = [:id, :title, :src, :updated_at]
+
+  include ActiveModel::Model
+  include MemoryStore
+
+  attr_accessor :id
+  attr_accessor :title
+  attr_accessor :src
+  attr_accessor :photographer
+  attr_accessor :updated_at
+end
+
+class People
+  STORE = {}
+  ATTRIBUTES = [:id, :name, :updated_at]
+
+  include ActiveModel::Model
+  include MemoryStore
+
+  attr_accessor :id
+  attr_accessor :name
+  attr_accessor :posts
+  attr_accessor :updated_at
+end
+
+class PhotoRealizer < JSONAPI::Realizer::Resource
+  represents :photos, class_name: "Photo"
+  adapter :memory
+
+  has_one :photographer, as: :people
+
+  has :title
+  has :src
+end
+
+class PeopleRealizer < JSONAPI::Realizer::Resource
+  represents :people, class_name: "People"
+  adapter :memory
+
+  has :name
+end
+
 RSpec.configure do |let|
   # Exit the spec after the first failure
   let.fail_fast = true
@@ -19,4 +80,14 @@ RSpec.configure do |let|
 
   # Output as a document string
   let.default_formatter = "doc"
+
+  let.before(:each) do
+    People::STORE.clear
+    Photo::STORE.clear
+  end
+
+  let.after(:each) do
+    People::STORE.clear
+    Photo::STORE.clear
+  end
 end

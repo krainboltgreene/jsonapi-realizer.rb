@@ -54,12 +54,32 @@ module JSONAPI
         @configuration = JSONAPI::Realizer.register(self, class_name.constantize, type.to_s)
       end
 
+      def self.adapter(interface, &block)
+        JSONAPI::Realizer::Adapter.adapt(self, interface, &block)
+      end
+
       def self.find_via(&finder)
         @find_via_call = finder
       end
 
       def self.find_via_call(model_class, id)
         @find_via_call.call(model_class, id)
+      end
+
+      def self.save_via(&saver)
+        @save_via_call = saver
+      end
+
+      def self.save_via_call(model)
+        @save_via_call.call(model)
+      end
+
+      def self.write_attributes_via(&writer)
+        @write_attributes_via_call = writer
+      end
+
+      def self.write_attributes_via_call(model, attributes)
+        @write_attributes_via_call.call(model, attributes)
       end
 
       def self.has_one(name, as: name)

@@ -5,6 +5,7 @@ module JSONAPI
   module Realizer
     require_relative "realizer/version"
     require_relative "realizer/action"
+    require_relative "realizer/adapter"
     require_relative "realizer/resource"
 
     def self.register(resource_class, model_class, type)
