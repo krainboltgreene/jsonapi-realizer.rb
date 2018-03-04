@@ -7,6 +7,24 @@
 
 This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into data models for your business logic.
 
+A successful JSON:API request can be annotated as:
+
+```
+JSONAPIRequest -> (PersistanceAdapter -> JSONAPIRequest -> (Record | Array<Record>)) -> JSONAPIResponse
+```
+
+The `jsonapi-serializers` library provides this shape:
+
+```
+JSONAPIRequest -> (Record | Array<Record>) -> JSONAPIResponse
+```
+
+But it leaves fetching/createing/updating/destroying the records up to you! This is where jsonapi-realizer comes into play, as it provides this shape:
+
+```
+PersistanceAdapter -> JSONAPIRequest -> (Record | Array<Record>)
+```
+
 
 ## Using
 
@@ -22,7 +40,7 @@ end
 class PhotoRealizer
   include JSONAPI::Realizer::Resource
 
-  adapter JSONAPI::Realizer::ActiveRecord
+  adapter :active_record
 
   represents :photos, class_name: "Photo"
 
@@ -35,7 +53,7 @@ end
 class ProfileRealizer
   include JSONAPI::Realizer::Resource
 
-  adapter JSONAPI::Realizer::ActiveRecord
+  adapter :active_record
 
   represents :profiles, class_name: "Profile"
 
@@ -45,14 +63,86 @@ class ProfileRealizer
 end
 ```
 
+Once you've designed your resources, we just need to use them! In this example, we'll use controllers from Rails:
+
 ``` ruby
 class PhotosController < ApplicationController
   def create
-    @record = JSONAPI::Realizer.create(params, headers: request.headers)
+    validate_parameters!
+    authenticate_session!
+
+    record = JSONAPI::Realizer.create(params, headers: request.headers)
+
+    ProcessPhotosService.new(record)
+
+    JSONAPI::Serializer.serialize(record)
   end
 end
 ```
 
+### Adapters
+
+There are two core adapters:
+
+  0. `:active_record`, which assumes an ActiveRecord-like interface.
+  0. `:memory`, which assumes a `STORE` Hash-like on the model class.
+
+An adapter must provide the following interfaces:
+
+  0. `find_via`, which tells the action how to find the model
+  0. `write_attributes_via`, which tells the action how to write an individual property
+  0. `save_via`, which tells the action how to save the model when it's done
+
+You can also provide custom adapter interfaces:
+
+``` ruby
+class PhotoRealizer
+  include JSONAPI::Realizer::Resource
+
+  adapter do
+    find_via do |model_class, id|
+      model_class.where { id == id or slug == id }.first
+    end
+
+    write_attributes_via do |model, attributes|
+      model.update_columns(attributes)
+    end
+
+    save_via do |model|
+      model.save!
+      Rails.cache.write(model.cache_key, model)
+    end
+  end
+
+  represents :photos, class_name: "Photo"
+
+  has_one :photographer, as: :profiles
+
+  has :title
+  has :src
+end
+```
+
+If you want, you can use both the regular adapters and some custom pieces:
+
+``` ruby
+class PhotoRealizer
+  include JSONAPI::Realizer::Resource
+
+  adapter :active_record do
+    find_via do |model_class, id|
+      model_class.where { id == id or slug == id }.first
+    end
+  end
+
+  represents :photos, class_name: "Photo"
+
+  has_one :photographer, as: :profiles
+
+  has :title
+  has :src
+end
+```
 
 ## Installing
 
