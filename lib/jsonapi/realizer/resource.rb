@@ -1,28 +1,10 @@
 module JSONAPI
   module Realizer
     class Resource
-      extend ActiveSupport::Concern
-
       attr_reader :model
 
       def initialize(model)
         @model = model
-      end
-
-      def relationship(name)
-        relationships.public_send(name.to_sym)
-      end
-
-      def attribute(name)
-        relationships.public_send(name.to_sym)
-      end
-
-      private def attributes
-        configuration.attributes
-      end
-
-      private def relationships
-        configuration.relationships
       end
 
       private def as_relationship(value)
@@ -34,6 +16,22 @@ module JSONAPI
         )
       end
 
+      private def attribute(name)
+        attributes.public_send(name.to_sym)
+      end
+
+      private def relationship(name)
+        relationships.public_send(name.to_sym)
+      end
+
+      private def attributes
+        configuration.attributes
+      end
+
+      private def relationships
+        configuration.relationships
+      end
+
       private def model_class
         configuration.model_class
       end
@@ -42,12 +40,28 @@ module JSONAPI
         self.class.configuration
       end
 
-      def valid_attribute?(name, value)
+      def self.attribute(name)
+        attributes.public_send(name.to_sym)
+      end
+
+      def self.relationship(name)
+        relationships.public_send(name.to_sym)
+      end
+
+      def self.valid_attribute?(name, value)
         attributes.respond_to?(name.to_sym)
       end
 
-      def valid_relationship?(name, value)
+      def self.valid_relationship?(name, value)
         relationships.respond_to?(name.to_sym)
+      end
+
+      def self.valid_fields?(name)
+        attribute(name).fetch(:selectable)
+      end
+
+      def self.valid_includes?(name)
+        relationship(name).fetch(:includable)
       end
 
       def self.represents(type, class_name:)
