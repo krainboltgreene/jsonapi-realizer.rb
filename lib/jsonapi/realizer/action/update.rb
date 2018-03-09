@@ -3,7 +3,7 @@ module JSONAPI
     class Action
       class Update < Action
         def initialize(payload:, headers:)
-          @data = payload.fetch("data")
+          @payload = payload
           @resource = resource_class.new(
             resource_class.find_via_call(relation, id)
           )

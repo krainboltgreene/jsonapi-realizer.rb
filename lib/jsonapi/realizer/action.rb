@@ -35,6 +35,10 @@ module JSONAPI
         )
       end
 
+      private def data
+        payload.fetch("data", {})
+      end
+
       private def id
         data.fetch("id", nil)
       end
