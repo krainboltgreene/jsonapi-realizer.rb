@@ -15,6 +15,10 @@ module JSONAPI
         raise NoMethodError, "must implement this function"
       end
 
+      private def model_class
+        resource_class.model_class
+      end
+
       private def resource_class
         JSONAPI::Realizer.mapping.fetch(type).resource_class
       end
