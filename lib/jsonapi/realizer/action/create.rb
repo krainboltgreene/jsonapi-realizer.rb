@@ -4,7 +4,9 @@ module JSONAPI
       class Create < Action
         def initialize(payload:, headers:)
           @data = payload.fetch("data")
-          @resource = resource_class.new(resource_class.model_class.new)
+          @resource = resource_class.new(
+            relation.new
+          )
         end
 
         def call

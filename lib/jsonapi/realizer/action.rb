@@ -27,6 +27,14 @@ module JSONAPI
         data.fetch("relationships", {})
       end
 
+      private def relation
+        relation_after_fields(
+          relation_after_inclusion(
+            model_class
+          )
+        )
+      end
+
       private def id
         data.fetch("id", nil)
       end

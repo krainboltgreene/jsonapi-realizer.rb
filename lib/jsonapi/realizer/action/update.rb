@@ -5,10 +5,7 @@ module JSONAPI
         def initialize(payload:, headers:)
           @data = payload.fetch("data")
           @resource = resource_class.new(
-            resource_class.find_via_call(
-              resource_class.model_class,
-              id
-            )
+            resource_class.find_via_call(relation, id)
           )
         end
 
