@@ -4,8 +4,7 @@ module JSONAPI
       require_relative "action/create"
       require_relative "action/update"
 
-      attr_reader :type
-      attr_reader :data
+      attr_reader :payload
       attr_reader :resource
 
       def initialize(payload:, headers:)
