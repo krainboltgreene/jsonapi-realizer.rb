@@ -7,7 +7,7 @@ module JSONAPI
       attr_reader :payload
       attr_reader :resource
 
-      def initialize(payload:, headers:)
+      def initialize
         raise NoMethodError, "must implement this function"
       end
 
