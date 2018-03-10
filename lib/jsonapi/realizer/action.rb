@@ -87,7 +87,7 @@ module JSONAPI
         payload.
           fetch("fields", []).
           split(/\s*,\s*/).
-          select(&resource_class.method(:valid_fields?))
+          select(&resource_class.method(:valid_sparse_field?))
       end
     end
   end

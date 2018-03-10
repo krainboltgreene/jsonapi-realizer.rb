@@ -56,7 +56,7 @@ module JSONAPI
         relationships.respond_to?(name.to_sym)
       end
 
-      def self.valid_fields?(name)
+      def self.valid_sparse_field?(name)
         attribute(name).fetch(:selectable)
       end
 
@@ -120,8 +120,8 @@ module JSONAPI
         @include_via_call.call(model_class, include)
       end
 
-      def self.has(name, sparsable: true)
-        attributes.public_send("#{name}=", OpenStruct.new({name: name, sparsable: sparsable}))
+      def self.has(name, selectable: true)
+        attributes.public_send("#{name}=", OpenStruct.new({name: name, selectable: sparsable}))
       end
 
       def self.has_related(name, as: name, includable: true)
