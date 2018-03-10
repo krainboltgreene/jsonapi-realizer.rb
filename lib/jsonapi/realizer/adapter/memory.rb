@@ -13,6 +13,14 @@ module JSONAPI
             model.assign_attributes(attributes)
           end
 
+          fields_via do |model_class, fields|
+            model_class
+          end
+
+          include_via do |model_class, includes|
+            model_class
+          end
+
           save_via do |model|
             model.assign_attributes(id: model.id || SecureRandom.uuid)
             model.assign_attributes(updated_at: Time.now)

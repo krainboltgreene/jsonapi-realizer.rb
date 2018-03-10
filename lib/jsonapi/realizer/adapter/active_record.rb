@@ -13,6 +13,20 @@ module JSONAPI
             model.assign_attributes(attributes)
           end
 
+          fields_via do |model_class, fields|
+            model_class.select(fields)
+          end
+
+          include_via do |model_class, includes|
+            model_class.includes(includes.map(&(recursively_nest = -> (chains) do
+              if chains.size == 1
+                chains.first
+              else
+                {chains.first => recursively_nest.call(chains.drop(1))}
+              end
+            end)))
+          end
+
           save_via do |model|
             model.save!
           end

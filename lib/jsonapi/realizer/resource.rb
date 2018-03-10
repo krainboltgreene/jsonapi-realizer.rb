@@ -96,12 +96,21 @@ module JSONAPI
         @write_attributes_via_call.call(model, attributes)
       end
 
+      def self.fields_via(&callback)
+        @fields_via_call = callback
       end
 
+      def self.fields_via_call(model_class, fields)
+        @fields_via_call.call(model_class, fields)
       end
 
+      def self.include_via(&callback)
+        @include_via_call = callback
       end
 
+      def self.include_via_call(model_class, include)
+        @include_via_call.call(model_class, include)
+      end
 
       def self.has(name, sparsable: true)
         attributes.public_send("#{name}=", OpenStruct.new({name: name, sparsable: sparsable}))

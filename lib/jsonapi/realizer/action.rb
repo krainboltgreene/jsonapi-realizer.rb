@@ -27,6 +27,22 @@ module JSONAPI
         data.fetch("relationships", {})
       end
 
+      private def relation_after_inclusion(relation)
+        if includes.any?
+          resource_class.include_via_call(relation, includes)
+        else
+          relation
+        end
+      end
+
+      private def relation_after_fields(relation)
+        if includes.any?
+          resource_class.fields_via_call(relation, fields)
+        else
+          relation
+        end
+      end
+
       private def relation
         relation_after_fields(
           relation_after_inclusion(
@@ -49,6 +65,26 @@ module JSONAPI
 
       private def attributes
         data.fetch("attributes", {})
+      end
+
+      private def includes
+        payload.
+          fetch("include", []).
+          # "carts.cart-items,carts.cart-items.product,carts.billing-information,payments"
+          map { |path| path.split(/\s*,\s*/) }.
+          # ["carts.cart-items", "carts.cart-items.product", "carts.billing-information", "payments"]
+          map { |path| path.gsub("-", "_") }.
+          # ["carts.cart_items", "carts.cart_items.product", "carts.billing_information", "payments"]
+          map { |path| path.split(".") }.
+          # [["carts", "cart_items"], ["carts", "cart_items", "product"], ["carts", "billing_information"], ["payments"]]
+          select(&resource_class.method(:valid_includes?))
+      end
+
+      private def fields
+        payload.
+          fetch("fields", []).
+          split(/\s*,\s*/).
+          select(&resource_class.method(:valid_fields?))
       end
     end
   end
