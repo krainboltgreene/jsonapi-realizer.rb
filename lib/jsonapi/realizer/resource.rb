@@ -96,20 +96,27 @@ module JSONAPI
         @write_attributes_via_call.call(model, attributes)
       end
 
-      def self.has_one(name, as: name)
-        relationships.public_send("#{name}=", OpenStruct.new({name: name, as: as}))
       end
 
-      def self.has(name)
-        attributes.public_send("#{name}=", OpenStruct.new({name: name}))
       end
 
-      def self.relationship(name)
-        relationships.public_send(name.to_sym)
       end
 
-      def self.attribute(name)
-        relationships.public_send(name.to_sym)
+
+      def self.has(name, sparsable: true)
+        attributes.public_send("#{name}=", OpenStruct.new({name: name, sparsable: sparsable}))
+      end
+
+      def self.has_related(name, as: name, includable: true)
+        relationships.public_send("#{name}=", OpenStruct.new({name: name, as: as, includable: includable}))
+      end
+
+      def self.has_one(name, as: name, includable: true)
+        has_related(name, as: name, includable: includable)
+      end
+
+      def self.has_many(name, as: name, includable: true)
+        has_related(name, as: name, includable: includable)
       end
 
       def self.attributes
