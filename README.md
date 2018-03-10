@@ -28,6 +28,8 @@ PersistanceAdapter -> JSONAPIRequest -> (Record | Array<Record>)
 
 ## Using
 
+In order to use this library you'll want to have some models:
+
 ``` ruby
 class Photo < ApplicationRecord
   belongs_to :photographer, class_name: "Profile"
@@ -36,7 +38,11 @@ end
 class Profile < ApplicationRecord
   has_many :photos
 end
+```
 
+*They don't have to be ActiveRecord* models, but we have built-in support for that library (adapter-based). Second you'll need some realizers:
+
+``` ruby
 class PhotoRealizer
   include JSONAPI::Realizer::Resource
 
@@ -61,6 +67,14 @@ class ProfileRealizer
 
   has :name
 end
+```
+
+You can define special properties on attributes and relationships realizers:
+
+``` ruby
+has_many :doctors, as: :users, includable: false
+
+has :title, selectable: false
 ```
 
 Once you've designed your resources, we just need to use them! In this example, we'll use controllers from Rails:
@@ -89,9 +103,12 @@ There are two core adapters:
 
 An adapter must provide the following interfaces:
 
-  0. `find_via`, which tells the action how to find the model
-  0. `write_attributes_via`, which tells the action how to write an individual property
-  0. `save_via`, which tells the action how to save the model when it's done
+  0. `find_via`, describes how to find the model
+  0. `find_many_via`, describes how to find many models
+  0. `write_attributes_via`, describes how to write an individual property
+  0. `save_via`, describes how to save the model when it's done
+  0. `includes_via`, describes how to eager include related models
+  0. `sparse_fields_via`, describes how to only return certain fields
 
 You can also provide custom adapter interfaces:
 
@@ -143,6 +160,7 @@ class PhotoRealizer
   has :src
 end
 ```
+
 
 ## Installing
 
