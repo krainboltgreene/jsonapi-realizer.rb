@@ -121,7 +121,7 @@ module JSONAPI
       end
 
       def self.has(name, selectable: true)
-        attributes.public_send("#{name}=", OpenStruct.new({name: name, selectable: sparsable}))
+        attributes.public_send("#{name}=", OpenStruct.new({name: name, selectable: selectable}))
       end
 
       def self.has_related(name, as: name, includable: true)
