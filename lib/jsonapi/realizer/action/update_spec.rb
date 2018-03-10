@@ -6,6 +6,10 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
   describe "#call" do
     subject { action.call }
 
+    context "with no top-level data" do
+
+    end
+
     context "with a good payload and good headers" do
       let(:payload) do
         {
@@ -43,7 +47,7 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
         }
       end
 
-      it "creates a model" do
+      it "is the right model" do
         expect(subject).to be_a_kind_of(Photo)
       end
 

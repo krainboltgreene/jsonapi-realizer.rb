@@ -29,6 +29,7 @@ class Photo
 
   attr_accessor :id
   attr_accessor :title
+  attr_accessor :alt_text
   attr_accessor :src
   attr_accessor :photographer
   attr_accessor :updated_at
@@ -60,6 +61,8 @@ end
 class PeopleRealizer < JSONAPI::Realizer::Resource
   represents :people, class_name: "People"
   adapter :memory
+
+  has_many :photos
 
   has :name
 end

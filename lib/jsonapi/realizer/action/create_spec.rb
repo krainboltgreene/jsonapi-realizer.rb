@@ -6,6 +6,10 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
   describe "#call" do
     subject { action.call }
 
+    context "with no top-level data" do
+
+    end
+
     context "with a good payload and good headers" do
       let(:payload) do
         {
@@ -14,6 +18,7 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
             "type" => "photos",
             "attributes" => {
               "title" => "Ember Hamster",
+              "alt-text" => "A hamster logo.",
               "src" => "http://example.com/images/productivity.png"
             },
             "relationships" => {
@@ -38,12 +43,16 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
         }
       end
 
-      it "creates a model" do
+      it "is the right model" do
         expect(subject).to be_a_kind_of(Photo)
       end
 
       it "assigns the attributes" do
-        expect(subject).to have_attributes(title: "Ember Hamster", src: "http://example.com/images/productivity.png", updated_at: a_kind_of(Time))
+        expect(subject).to have_attributes(
+          title: "Ember Hamster",
+          src: "http://example.com/images/productivity.png",
+          updated_at: a_kind_of(Time)
+        )
       end
 
       it "relates the relationships" do
@@ -51,7 +60,21 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
       end
 
       it "stores the new record" do
-        expect {subject}.to change {Photo::STORE}.from({}).to({"550e8400-e29b-41d4-a716-446655440000" => hash_including(id: "550e8400-e29b-41d4-a716-446655440000", title: "Ember Hamster", src: "http://example.com/images/productivity.png")})
+        expect {
+          subject
+        }.to change {
+          Photo::STORE
+        }.from(
+          {}
+        ).to(
+          {
+            "550e8400-e29b-41d4-a716-446655440000" => hash_including(
+              id: "550e8400-e29b-41d4-a716-446655440000",
+              title: "Ember Hamster",
+              src: "http://example.com/images/productivity.png"
+            )
+          }
+        )
       end
     end
   end
