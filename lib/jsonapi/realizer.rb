@@ -26,5 +26,14 @@ module JSONAPI
     def self.create(payload, headers:)
       Create.new(payload: payload, headers: headers).call
     end
+
+    def self.update(payload, headers:)
+      Update.new(payload: payload, headers: headers).call
+    end
+
+    def self.show(payload, headers:, type:)
+      Show.new(payload: payload, headers: headers, type: type).call
+    end
+
   end
 end
