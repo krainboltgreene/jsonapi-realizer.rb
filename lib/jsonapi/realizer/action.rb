@@ -20,7 +20,7 @@ module JSONAPI
       end
 
       private def resource_class
-        JSONAPI::Realizer.mapping.fetch(type).resource_class
+        JSONAPI::Realizer.mapping.fetch(type.to_s).resource_class
       end
 
       private def relationships
