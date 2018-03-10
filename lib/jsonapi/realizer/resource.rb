@@ -104,12 +104,12 @@ module JSONAPI
         @write_attributes_via_call.call(model, attributes)
       end
 
-      def self.fields_via(&callback)
-        @fields_via_call = callback
+      def self.sparse_fields(&callback)
+        @sparse_fields_call = callback
       end
 
-      def self.fields_via_call(model_class, fields)
-        @fields_via_call.call(model_class, fields)
+      def self.sparse_fields_call(model_class, fields)
+        @sparse_fields_call.call(model_class, fields)
       end
 
       def self.include_via(&callback)

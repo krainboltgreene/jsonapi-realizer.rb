@@ -17,7 +17,7 @@ module JSONAPI
             model.assign_attributes(attributes)
           end
 
-          fields_via do |model_class, fields|
+          sparse_fields do |model_class, fields|
             model_class.select(fields)
           end
 
