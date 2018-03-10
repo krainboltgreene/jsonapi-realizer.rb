@@ -4,6 +4,7 @@ module JSONAPI
       class Create < Action
         def initialize(payload:, headers:)
           @payload = payload
+          @headers = headers
           @resource = resource_class.new(
             relation.new
           )
