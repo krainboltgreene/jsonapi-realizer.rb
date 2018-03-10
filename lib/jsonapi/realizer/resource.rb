@@ -88,20 +88,28 @@ module JSONAPI
         @find_many_via_call.call(model_class)
       end
 
-      def self.save_via(&callback)
-        @save_via_call = callback
+      def self.create_via(&callback)
+        @create_via_call = callback
       end
 
-      def self.save_via_call(model)
-        @save_via_call.call(model)
+      def self.create_via_call(model)
+        @create_via_call.call(model)
       end
 
-      def self.write_attributes_via(&callback)
-        @write_attributes_via_call = callback
+      def self.update_via(&callback)
+        @update_via_call = callback
       end
 
-      def self.write_attributes_via_call(model, attributes)
-        @write_attributes_via_call.call(model, attributes)
+      def self.update_via_call(model)
+        @update_via_call.call(model)
+      end
+
+      def self.assign_attributes_via(&callback)
+        @assign_attributes_via_call = callback
+      end
+
+      def self.assign_attributes_via_call(model, attributes)
+        @assign_attributes_via_call.call(model, attributes)
       end
 
       def self.sparse_fields(&callback)

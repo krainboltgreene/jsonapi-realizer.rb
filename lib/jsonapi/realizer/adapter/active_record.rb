@@ -13,7 +13,7 @@ module JSONAPI
             model_class.find(id)
           end
 
-          write_attributes_via do |model, attributes|
+          assign_attributes_via do |model, attributes|
             model.assign_attributes(attributes)
           end
 
@@ -31,8 +31,12 @@ module JSONAPI
             end)))
           end
 
-          save_via do |model|
-            model.save!
+          create_via do |model|
+            model.create!
+          end
+
+          update_via do |model|
+            model.update!
           end
         end
       end

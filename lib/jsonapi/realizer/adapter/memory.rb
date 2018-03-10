@@ -13,7 +13,7 @@ module JSONAPI
             model_class.fetch(id)
           end
 
-          write_attributes_via do |model, attributes|
+          assign_attributes_via do |model, attributes|
             model.assign_attributes(attributes)
           end
 
@@ -25,8 +25,15 @@ module JSONAPI
             model_class
           end
 
-          save_via do |model|
+          create_via do |model|
             model.assign_attributes(id: model.id || SecureRandom.uuid)
+            model.assign_attributes(updated_at: Time.now)
+            model_class.const_get("STORE")[model.id] = model_class.const_get("ATTRIBUTES").inject({}) do |hash, key|
+              hash.merge({ key => model.public_send(key) })
+            end
+          end
+
+          update_via do |model|
             model.assign_attributes(updated_at: Time.now)
             model_class.const_get("STORE")[model.id] = model_class.const_get("ATTRIBUTES").inject({}) do |hash, key|
               hash.merge({ key => model.public_send(key) })

@@ -105,8 +105,9 @@ An adapter must provide the following interfaces:
 
   0. `find_via`, describes how to find the model
   0. `find_many_via`, describes how to find many models
-  0. `write_attributes_via`, describes how to write an individual property
-  0. `save_via`, describes how to save the model when it's done
+  0. `assign_attributes_via`, describes how to write a set of properties
+  0. `create_via`, describes how to create the model
+  0. `update_via`, describes how to update the model
   0. `includes_via`, describes how to eager include related models
   0. `sparse_fields_via`, describes how to only return certain fields
 
@@ -121,11 +122,11 @@ class PhotoRealizer
       model_class.where { id == id or slug == id }.first
     end
 
-    write_attributes_via do |model, attributes|
+    assign_attributes_via do |model, attributes|
       model.update_columns(attributes)
     end
 
-    save_via do |model|
+    create_via do |model|
       model.save!
       Rails.cache.write(model.cache_key, model)
     end

@@ -26,8 +26,9 @@ module JSONAPI
 
         raise ArgumentError, "need to provide a Adapter.find_via interface" unless resource.instance_variable_defined?(:@find_via_call)
         raise ArgumentError, "need to provide a Adapter.find_many_via_call interface" unless resource.instance_variable_defined?(:@find_many_via_call)
-        raise ArgumentError, "need to provide a Adapter.write_attributes_via interface" unless resource.instance_variable_defined?(:@write_attributes_via_call)
-        raise ArgumentError, "need to provide a Adapter.save_via interface" unless resource.instance_variable_defined?(:@save_via_call)
+        raise ArgumentError, "need to provide a Adapter.assign_attributes_via interface" unless resource.instance_variable_defined?(:@assign_attributes_via_call)
+        raise ArgumentError, "need to provide a Adapter.create_via interface" unless resource.instance_variable_defined?(:@create_via_call)
+        raise ArgumentError, "need to provide a Adapter.update_via interface" unless resource.instance_variable_defined?(:@update_via_call)
         raise ArgumentError, "need to provide a Adapter.sparse_fields interface" unless resource.instance_variable_defined?(:@sparse_fields_call)
         raise ArgumentError, "need to provide a Adapter.include_via interface" unless resource.instance_variable_defined?(:@include_via_call)
       end

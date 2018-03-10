@@ -26,9 +26,6 @@ module JSONAPI
         JSONAPI::Realizer.mapping.fetch(type.to_s).resource_class
       end
 
-      private def relationships
-        data.fetch("relationships", {})
-      end
 
       private def relation_after_inclusion(relation)
         if includes.any?
@@ -67,7 +64,17 @@ module JSONAPI
       end
 
       private def attributes
-        data.fetch("attributes", {})
+        data.
+          fetch("attributes", {}).
+          select(&resource_class.method(:valid_attribute?)).
+          transform_keys(&:underscore)
+      end
+
+      private def relationships
+        data.
+          fetch("relationships", {}).
+          select(&resource_class.method(:valid_relationship?)).
+          transform_keys(&:underscore)
       end
 
       private def includes

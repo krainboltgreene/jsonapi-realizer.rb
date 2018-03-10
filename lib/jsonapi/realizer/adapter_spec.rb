@@ -23,11 +23,15 @@ RSpec.describe JSONAPI::Realizer::Adapter do
 
     end
 
-    context "when the write_attributes_via interface isn't defined" do
+    context "when the assign_attributes_via interface isn't defined" do
 
     end
 
-    context "when the save_via interface isn't defined" do
+    context "when the create_via interface isn't defined" do
+
+    end
+
+    context "when the update_via interface isn't defined" do
 
     end
   end
