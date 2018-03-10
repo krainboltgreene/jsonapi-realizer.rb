@@ -35,5 +35,8 @@ module JSONAPI
       Show.new(payload: payload, headers: headers, type: type).call
     end
 
+    def self.index(payload, headers:, type:)
+      Index.new(payload: payload, headers: headers, type: type).call
+    end
   end
 end

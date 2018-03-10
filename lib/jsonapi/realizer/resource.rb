@@ -80,6 +80,14 @@ module JSONAPI
         @find_via_call.call(model_class, id)
       end
 
+      def self.find_many_via(&callback)
+        @find_many_via_call = callback
+      end
+
+      def self.find_many_via_call(model_class)
+        @find_many_via_call.call(model_class)
+      end
+
       def self.save_via(&callback)
         @save_via_call = callback
       end

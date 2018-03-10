@@ -5,6 +5,10 @@ module JSONAPI
         extend ActiveSupport::Concern
 
         included do
+          find_many_via do |model_class|
+            model_class.all
+          end
+
           find_via do |model_class, id|
             model_class.find(id)
           end

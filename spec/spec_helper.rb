@@ -17,6 +17,10 @@ module MemoryStore
     def fetch(id)
       self.new(self.const_get("STORE").fetch(id))
     end
+
+    def all
+      self.const_get("STORE").values.map(&method(:new))
+    end
   end
 end
 

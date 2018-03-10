@@ -3,9 +3,12 @@ module JSONAPI
     class Action
       require_relative "action/create"
       require_relative "action/update"
+      require_relative "action/show"
+      require_relative "action/index"
 
       attr_reader :payload
       attr_reader :resource
+      attr_reader :resources
 
       def initialize
         raise NoMethodError, "must implement this function"
@@ -56,11 +59,11 @@ module JSONAPI
       end
 
       private def id
-        data.fetch("id", nil)
+        data.fetch("id", nil) || payload.fetch("id", nil)
       end
 
       private def type
-        data.fetch("type")
+        @type || data.fetch("type")
       end
 
       private def attributes
