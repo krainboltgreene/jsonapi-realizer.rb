@@ -72,24 +72,24 @@ module JSONAPI
         JSONAPI::Realizer::Adapter.adapt(self, interface, &block)
       end
 
-      def self.find_via(&finder)
-        @find_via_call = finder
+      def self.find_via(&callback)
+        @find_via_call = callback
       end
 
       def self.find_via_call(model_class, id)
         @find_via_call.call(model_class, id)
       end
 
-      def self.save_via(&saver)
-        @save_via_call = saver
+      def self.save_via(&callback)
+        @save_via_call = callback
       end
 
       def self.save_via_call(model)
         @save_via_call.call(model)
       end
 
-      def self.write_attributes_via(&writer)
-        @write_attributes_via_call = writer
+      def self.write_attributes_via(&callback)
+        @write_attributes_via_call = callback
       end
 
       def self.write_attributes_via_call(model, attributes)
