@@ -52,7 +52,9 @@ class People
   attr_accessor :updated_at
 end
 
-class PhotoRealizer < JSONAPI::Realizer::Resource
+class PhotoRealizer
+  include JSONAPI::Realizer::Resource
+
   register :photos, class_name: "Photo", adapter: :memory
 
   has_one :active_photographer, as: :people
@@ -62,7 +64,9 @@ class PhotoRealizer < JSONAPI::Realizer::Resource
   has :src
 end
 
-class PeopleRealizer < JSONAPI::Realizer::Resource
+class PeopleRealizer
+  include JSONAPI::Realizer::Resource
+
   register :photographer_people, class_name: "People", adapter: :memory
 
   has_many :photos
