@@ -26,7 +26,7 @@ end
 
 class Photo
   STORE = {}
-  ATTRIBUTES = [:id, :title, :src, :updated_at]
+  ATTRIBUTES = [:id, :title, :alt_text, :src, :updated_at]
 
   include ActiveModel::Model
   include MemoryStore
@@ -35,7 +35,7 @@ class Photo
   attr_accessor :title
   attr_accessor :alt_text
   attr_accessor :src
-  attr_accessor :photographer
+  attr_accessor :active_photographer
   attr_accessor :updated_at
 end
 
@@ -53,18 +53,17 @@ class People
 end
 
 class PhotoRealizer < JSONAPI::Realizer::Resource
-  represents :photos, class_name: "Photo"
-  adapter :memory
+  register :photos, class_name: "Photo", adapter: :memory
 
-  has_one :photographer, as: :people
+  has_one :active_photographer, as: :people
 
   has :title
+  has :alt_text
   has :src
 end
 
 class PeopleRealizer < JSONAPI::Realizer::Resource
-  represents :people, class_name: "People"
-  adapter :memory
+  register :people, class_name: "People", adapter: :memory
 
   has_many :photos
 
@@ -79,7 +78,7 @@ RSpec.configure do |let|
   let.disable_monkey_patching!
 
   # Exit the spec after the first failure
-  let.fail_fast = true
+  # let.fail_fast = true
 
   # Only run a specific file, using the ENV variable
   # Example: FILE=lib/jsonapi/realizer/version_spec.rb bundle exec rake spec

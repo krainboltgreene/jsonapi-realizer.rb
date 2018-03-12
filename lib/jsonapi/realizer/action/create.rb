@@ -2,6 +2,8 @@ module JSONAPI
   module Realizer
     class Action
       class Create < Action
+        attr_accessor :resource
+
         def initialize(payload:, headers:)
           @payload = payload
           @headers = headers
@@ -11,12 +13,14 @@ module JSONAPI
         end
 
         def call
-          resource.model.tap do |model|
-            resource_class.assign_attributes_via_call(model, {id: id}) if id
-            resource_class.assign_attributes_via_call(model, attributes)
-            resource_class.assign_attributes_via_call(model, relationships)
-            resource_class.create_via_call(model)
-          end
+          adapter.assign_attributes_via_call(resource.model, {id: id}) if id
+          adapter.assign_attributes_via_call(resource.model, attributes)
+          adapter.assign_relationships_via_call(resource.model, relationships)
+          adapter.create_via_call(resource.model)
+        end
+
+        def model
+          resource.model
         end
       end
     end

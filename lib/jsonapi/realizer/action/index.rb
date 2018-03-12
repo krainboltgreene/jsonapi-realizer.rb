@@ -2,14 +2,16 @@ module JSONAPI
   module Realizer
     class Action
       class Index < Action
+        attr_accessor :resources
+
         def initialize(payload:, headers:, type:)
           @payload = payload
           @headers = headers
           @type = type
-          @resources = resource_class.find_many_via_call(relation).map(&resource_class.method(:new))
+          @resources = adapter.find_many_via_call(relation).map(&resource_class.method(:new))
         end
 
-        def call
+        def models
           resources.map(&:model)
         end
       end

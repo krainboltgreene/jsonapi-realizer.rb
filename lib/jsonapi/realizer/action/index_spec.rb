@@ -3,8 +3,8 @@ require "spec_helper"
 RSpec.describe JSONAPI::Realizer::Action::Index do
   let(:action) { described_class.new(payload: payload, headers: headers, type: :photos) }
 
-  describe "#call" do
-    subject { action.call }
+  describe "#models" do
+    subject { action.models }
 
     context "with no top-level data" do
 
@@ -34,7 +34,7 @@ RSpec.describe JSONAPI::Realizer::Action::Index do
         }
       end
 
-      it "is the right model" do
+      it "returns a list of photos" do
         expect(subject).to include(a_kind_of(Photo), a_kind_of(Photo))
       end
     end

@@ -7,25 +7,24 @@ module JSONAPI
       require_relative "action/index"
 
       attr_reader :payload
-      attr_reader :resource
-      attr_reader :resources
 
       def initialize
         raise NoMethodError, "must implement this function"
       end
 
-      def call
-        raise NoMethodError, "must implement this function"
-      end
+      def call; end
 
       private def model_class
         resource_class.model_class
       end
 
       private def resource_class
-        JSONAPI::Realizer.mapping.fetch(type.to_s).resource_class
+        configuration.resource_class
       end
 
+      private def adapter
+        configuration.adapter
+      end
 
       private def relation_after_inclusion(relation)
         if includes.any?
@@ -66,15 +65,25 @@ module JSONAPI
       private def attributes
         data.
           fetch("attributes", {}).
-          select(&resource_class.method(:valid_attribute?)).
-          transform_keys(&:underscore)
+          transform_keys(&:underscore).
+          select(&resource_class.method(:valid_attribute?))
       end
 
       private def relationships
         data.
           fetch("relationships", {}).
+          transform_keys(&:underscore).
           select(&resource_class.method(:valid_relationship?)).
-          transform_keys(&:underscore)
+          transform_values(&method(:as_relationship))
+      end
+
+      private def as_relationship(value)
+        data = value.fetch("data")
+        mapping = JSONAPI::Realizer.type_mapping.fetch(data.fetch("type"))
+        mapping.adapter.find_via_call(
+          mapping.model_class,
+          data.fetch("id")
+        )
       end
 
       private def includes
@@ -95,6 +104,10 @@ module JSONAPI
           fetch("fields", []).
           split(/\s*,\s*/).
           select(&resource_class.method(:valid_sparse_field?))
+      end
+
+      private def configuration
+        JSONAPI::Realizer.type_mapping.fetch(type.to_s)
       end
     end
   end

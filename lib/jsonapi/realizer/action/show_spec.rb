@@ -3,8 +3,8 @@ require "spec_helper"
 RSpec.describe JSONAPI::Realizer::Action::Show do
   let(:action) { described_class.new(payload: payload, headers: headers, type: :photos) }
 
-  describe "#call" do
-    subject { action.call }
+  describe "#model" do
+    subject { action.model }
 
     context "with no top-level data" do
 
@@ -36,11 +36,11 @@ RSpec.describe JSONAPI::Realizer::Action::Show do
         }
       end
 
-      it "is the right model" do
+      it "returns a photo model" do
         expect(subject).to be_a_kind_of(Photo)
       end
 
-      it "has the right attributes" do
+      it "returns the photos attributes" do
         expect(subject).to have_attributes(title: "Ember Fox", src: "http://example.com/images/productivity-2.png")
       end
     end

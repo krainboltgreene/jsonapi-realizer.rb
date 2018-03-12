@@ -22,13 +22,14 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
               "src" => "http://example.com/images/productivity.png"
             },
             "relationships" => {
-              "photographer" => {
+              "active-photographer" => {
                 "data" => { "type" => "people", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
               }
             }
           }
         }
       end
+
       let(:headers) do
         {
           "Content-Type" => "application/vnd.api+json",
@@ -44,22 +45,48 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
       end
 
       it "is the right model" do
-        expect(subject).to be_a_kind_of(Photo)
+        subject
+
+        expect(action.model).to be_a_kind_of(Photo)
       end
 
-      it "assigns the attributes" do
-        expect(subject).to have_attributes(
-          title: "Ember Hamster",
-          src: "http://example.com/images/productivity.png",
-          updated_at: a_kind_of(Time)
-        )
+      it "assigns the id attribute" do
+        subject
+
+        expect(action.model).to have_attributes(id: "550e8400-e29b-41d4-a716-446655440000")
       end
 
-      it "relates the relationships" do
-        expect(subject).to have_attributes(photographer: a_kind_of(People))
+      it "assigns the title attribute" do
+        subject
+
+        expect(action.model).to have_attributes(title: "Ember Hamster")
       end
 
-      it "stores the new record" do
+      it "assigns the alt_text attribute" do
+        subject
+
+        expect(action.model).to have_attributes(alt_text: "A hamster logo.")
+      end
+
+      it "assigns the src attribute" do
+        subject
+
+        expect(action.model).to have_attributes(src: "http://example.com/images/productivity.png")
+      end
+
+      it "assigns the updated_at attribute" do
+        subject
+
+        expect(action.model).to have_attributes(updated_at: a_kind_of(Time))
+      end
+
+      it "assigns the active_photographer attribute" do
+        subject
+
+        expect(action.model).to have_attributes(active_photographer: a_kind_of(People))
+      end
+
+      it "creates the new record" do
         expect {
           subject
         }.to change {
@@ -71,6 +98,7 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
             "550e8400-e29b-41d4-a716-446655440000" => hash_including(
               id: "550e8400-e29b-41d4-a716-446655440000",
               title: "Ember Hamster",
+              alt_text: "A hamster logo.",
               src: "http://example.com/images/productivity.png"
             )
           }
