@@ -23,7 +23,7 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
             },
             "relationships" => {
               "active-photographer" => {
-                "data" => { "type" => "people", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
+                "data" => { "type" => "photographer-people", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
               }
             }
           }

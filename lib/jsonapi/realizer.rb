@@ -15,7 +15,7 @@ module JSONAPI
         resource_class: resource_class,
         model_class: model_class,
         adapter: adapter,
-        type: type,
+        type: type.dasherize,
         attributes: OpenStruct.new({}),
         relationships: OpenStruct.new({})
        })
@@ -46,7 +46,7 @@ module JSONAPI
     end
 
     private_class_method def self.inact(action)
-      action.tap(&:call).result
+      action.tap(&:call)
     end
   end
 end

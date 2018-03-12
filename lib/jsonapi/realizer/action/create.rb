@@ -7,9 +7,7 @@ module JSONAPI
         def initialize(payload:, headers:)
           @payload = payload
           @headers = headers
-          @resource = resource_class.new(
-            relation.new
-          )
+          @resource = resource_class.new(relation.new)
         end
 
         def call

@@ -63,7 +63,7 @@ class PhotoRealizer < JSONAPI::Realizer::Resource
 end
 
 class PeopleRealizer < JSONAPI::Realizer::Resource
-  register :people, class_name: "People", adapter: :memory
+  register :photographer_people, class_name: "People", adapter: :memory
 
   has_many :photos
 

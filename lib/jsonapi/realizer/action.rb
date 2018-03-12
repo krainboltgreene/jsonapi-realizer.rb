@@ -59,7 +59,7 @@ module JSONAPI
       end
 
       private def type
-        @type || data.fetch("type")
+        (@type || data.fetch("type")).to_s.dasherize
       end
 
       private def attributes
@@ -107,7 +107,7 @@ module JSONAPI
       end
 
       private def configuration
-        JSONAPI::Realizer.type_mapping.fetch(type.to_s)
+        JSONAPI::Realizer.type_mapping.fetch(type)
       end
     end
   end
