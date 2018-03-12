@@ -46,9 +46,7 @@ end
 class PhotoRealizer
   include JSONAPI::Realizer::Resource
 
-  adapter :active_record
-
-  register :photos, class_name: "Photo"
+  register :photos, class_name: "Photo", adapter: :active_record
 
   has_one :photographer, as: :profiles
 
@@ -59,9 +57,7 @@ end
 class ProfileRealizer
   include JSONAPI::Realizer::Resource
 
-  adapter :active_record
-
-  register :profiles, class_name: "Profile"
+  register :profiles, class_name: "Profile", adapter: :active_record
 
   has_many :photos, as: :photos
 
@@ -85,11 +81,24 @@ class PhotosController < ApplicationController
     validate_parameters!
     authenticate_session!
 
-    record = JSONAPI::Realizer.create(params, headers: request.headers)
+    realization = JSONAPI::Realizer.create(params, headers: request.headers)
 
-    ProcessPhotosService.new(record)
+    ProcessPhotosService.new(realization.model)
 
-    JSONAPI::Serializer.serialize(record)
+    render json: JSONAPI::Serializer.serialize(record)
+  end
+
+  def index
+    validate_parameters!
+    authenticate_session!
+
+    realization = JSONAPI::Realizer.index(params, headers: request.headers, type: :photos)
+
+    # See: pundit for `authorize()`
+    authorize realization.models
+
+    # See: pundit for `policy_scope()`
+    render json: JSONAPI::Serializer.serialize(policy_scope(record), is_collection: true)
   end
 end
 ```
@@ -106,6 +115,7 @@ An adapter must provide the following interfaces:
   0. `find_via`, describes how to find the model
   0. `find_many_via`, describes how to find many models
   0. `assign_attributes_via`, describes how to write a set of properties
+  0. `assign_relationships_via`, describes how to write a set of relationships
   0. `create_via`, describes how to create the model
   0. `update_via`, describes how to update the model
   0. `includes_via`, describes how to eager include related models
@@ -117,43 +127,20 @@ You can also provide custom adapter interfaces:
 class PhotoRealizer
   include JSONAPI::Realizer::Resource
 
-  adapter do
-    find_via do |model_class, id|
-      model_class.where { id == id or slug == id }.first
-    end
+  register :photos, class_name: "Photo", adapter: :active_record
 
-    assign_attributes_via do |model, attributes|
-      model.update_columns(attributes)
-    end
-
-    create_via do |model|
-      model.save!
-      Rails.cache.write(model.cache_key, model)
-    end
+  adapter.find_via do |model_class, id|
+    model_class.where { id == id or slug == id }.first
   end
 
-  register :photos, class_name: "Photo"
-
-  has_one :photographer, as: :profiles
-
-  has :title
-  has :src
-end
-```
-
-If you want, you can use both the regular adapters and some custom pieces:
-
-``` ruby
-class PhotoRealizer
-  include JSONAPI::Realizer::Resource
-
-  adapter :active_record do
-    find_via do |model_class, id|
-      model_class.where { id == id or slug == id }.first
-    end
+  adapter.assign_attributes_via do |model, attributes|
+    model.update_columns(attributes)
   end
 
-  register :photos, class_name: "Photo"
+  adapter.create_via do |model|
+    model.save!
+    Rails.cache.write(model.cache_key, model)
+  end
 
   has_one :photographer, as: :profiles
 
@@ -167,7 +154,7 @@ end
 
 Add this line to your application's Gemfile:
 
-    gem "jsonapi-realizer", "1.0.0"
+    gem "jsonapi-realizer", "2.0.0"
 
 And then execute:
 
