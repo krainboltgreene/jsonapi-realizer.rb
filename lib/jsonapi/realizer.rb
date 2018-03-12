@@ -30,19 +30,23 @@ module JSONAPI
     end
 
     def self.create(payload, headers:)
-      Create.new(payload: payload, headers: headers).tap(&:call)
+      enact(Create.new(payload: payload, headers: headers))
     end
 
     def self.update(payload, headers:)
-      Update.new(payload: payload, headers: headers).tap(&:call)
+      enact(Update.new(payload: payload, headers: headers))
     end
 
     def self.show(payload, headers:, type:)
-      Show.new(payload: payload, headers: headers, type: type).tap(&:call)
+      enact(Show.new(payload: payload, headers: headers, type: type))
     end
 
     def self.index(payload, headers:, type:)
-      Index.new(payload: payload, headers: headers, type: type).tap(&:call)
+      enact(Index.new(payload: payload, headers: headers, type: type))
+    end
+
+    private_class_method def self.inact(action)
+      action.tap(&:call).result
     end
   end
 end
