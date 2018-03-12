@@ -48,7 +48,7 @@ class PhotoRealizer
 
   adapter :active_record
 
-  represents :photos, class_name: "Photo"
+  register :photos, class_name: "Photo"
 
   has_one :photographer, as: :profiles
 
@@ -61,7 +61,7 @@ class ProfileRealizer
 
   adapter :active_record
 
-  represents :profiles, class_name: "Profile"
+  register :profiles, class_name: "Profile"
 
   has_many :photos, as: :photos
 
@@ -132,7 +132,7 @@ class PhotoRealizer
     end
   end
 
-  represents :photos, class_name: "Photo"
+  register :photos, class_name: "Photo"
 
   has_one :photographer, as: :profiles
 
@@ -153,7 +153,7 @@ class PhotoRealizer
     end
   end
 
-  represents :photos, class_name: "Photo"
+  register :photos, class_name: "Photo"
 
   has_one :photographer, as: :profiles
 
