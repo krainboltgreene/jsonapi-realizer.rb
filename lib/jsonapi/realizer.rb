@@ -34,18 +34,18 @@ module JSONAPI
     end
 
     def self.update(payload, headers:)
-      enact(Update.new(payload: payload, headers: headers))
+      enact(Action::Update.new(payload: payload, headers: headers))
     end
 
     def self.show(payload, headers:, type:)
-      enact(Show.new(payload: payload, headers: headers, type: type))
+      enact(Action::Show.new(payload: payload, headers: headers, type: type))
     end
 
     def self.index(payload, headers:, type:)
-      enact(Index.new(payload: payload, headers: headers, type: type))
+      enact(Action::Index.new(payload: payload, headers: headers, type: type))
     end
 
-    private_class_method def self.inact(action)
+    private_class_method def self.enact(action)
       action.tap(&:call)
     end
   end
