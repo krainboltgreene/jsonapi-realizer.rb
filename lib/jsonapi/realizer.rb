@@ -30,7 +30,7 @@ module JSONAPI
     end
 
     def self.create(payload, headers:)
-      enact(Create.new(payload: payload, headers: headers))
+      enact(Action::Create.new(payload: payload, headers: headers))
     end
 
     def self.update(payload, headers:)
