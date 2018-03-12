@@ -6,9 +6,9 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
   describe "#call" do
     subject { action.call }
 
-    context "with no top-level data" do
-
-    end
+    context "with no top-level data and good headers"
+    context "with no top-level data and bad headers"
+    context "with a good payload and bad headers"
 
     context "with a good payload and good headers" do
       let(:payload) do
