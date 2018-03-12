@@ -10,7 +10,7 @@ This library handles incoming [json:api](https://www.jsonapi.org) payloads and t
 A successful JSON:API request can be annotated as:
 
 ```
-JSONAPIRequest -> (PersistanceAdapter -> JSONAPIRequest -> (Record | Array<Record>)) -> JSONAPIResponse
+JSONAPIRequest -> (BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)) -> JSONAPIResponse
 ```
 
 The `jsonapi-serializers` library provides this shape:
@@ -22,7 +22,7 @@ JSONAPIRequest -> (Record | Array<Record>) -> JSONAPIResponse
 But it leaves fetching/createing/updating/destroying the records up to you! This is where jsonapi-realizer comes into play, as it provides this shape:
 
 ```
-PersistanceAdapter -> JSONAPIRequest -> (Record | Array<Record>)
+BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)
 ```
 
 
