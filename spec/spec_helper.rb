@@ -35,11 +35,11 @@ class Photo
   attr_accessor :title
   attr_accessor :alt_text
   attr_accessor :src
-  attr_accessor :active_photographer
   attr_accessor :updated_at
+  attr_accessor :active_photographer
 end
 
-class People
+class Account
   STORE = {}
   ATTRIBUTES = [:id, :name, :updated_at]
 
@@ -48,8 +48,34 @@ class People
 
   attr_accessor :id
   attr_accessor :name
-  attr_accessor :posts
   attr_accessor :updated_at
+  attr_accessor :posts
+end
+
+class Post
+  STORE = {}
+  ATTRIBUTES = [:id, :title, :updated_at]
+
+  include ActiveModel::Model
+  include MemoryStore
+
+  attr_accessor :id
+  attr_accessor :title
+  attr_accessor :updated_at
+  attr_accessor :author
+end
+
+class Comment
+  STORE = {}
+  ATTRIBUTES = [:id, :body, :updated_at]
+
+  include ActiveModel::Model
+  include MemoryStore
+
+  attr_accessor :id
+  attr_accessor :body
+  attr_accessor :updated_at
+  attr_accessor :post
 end
 
 class PhotoRealizer
@@ -57,21 +83,43 @@ class PhotoRealizer
 
   register :photos, class_name: "Photo", adapter: :memory
 
-  has_one :active_photographer, as: :people
+  has_one :active_photographer, as: :photographer_accounts
 
   has :title
   has :alt_text
   has :src
 end
 
-class PeopleRealizer
+class AccountRealizer
   include JSONAPI::Realizer::Resource
 
-  register :photographer_people, class_name: "People", adapter: :memory
+  register :photographer_accounts, class_name: "Account", adapter: :memory
 
   has_many :photos
+  has_many :posts
 
   has :name
+end
+
+class PostRealizer
+  include JSONAPI::Realizer::Resource
+
+  register :posts, class_name: "Post", adapter: :memory
+
+  has_one :author, as: :photographer_accounts
+  has_many :comments, includable: false
+
+  has :title
+end
+
+class CommentRealizer
+  include JSONAPI::Realizer::Resource
+
+  register :comments, class_name: "Comment", adapter: :memory
+
+  has_one :post
+
+  has :title
 end
 
 RSpec.configure do |let|
@@ -98,12 +146,12 @@ RSpec.configure do |let|
   let.default_formatter = "doc"
 
   let.before(:each) do
-    People::STORE.clear
+    Account::STORE.clear
     Photo::STORE.clear
   end
 
   let.after(:each) do
-    People::STORE.clear
+    Account::STORE.clear
     Photo::STORE.clear
   end
 end

@@ -23,7 +23,7 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
             },
             "relationships" => {
               "active-photographer" => {
-                "data" => { "type" => "photographer-people", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
+                "data" => { "type" => "photographer-accounts", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
               }
             }
           }
@@ -37,7 +37,7 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
       end
 
       before do
-        People::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
+        Account::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
           id: "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9",
           name: "Kurtis Rainbolt-Greene"
         }
@@ -81,7 +81,7 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
       it "assigns the active_photographer attribute" do
         subject
 
-        expect(action.model).to have_attributes(active_photographer: a_kind_of(People))
+        expect(action.model).to have_attributes(active_photographer: a_kind_of(Account))
       end
 
       it "updates the record" do

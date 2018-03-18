@@ -98,7 +98,7 @@ RSpec.describe JSONAPI::Realizer do
             },
             "relationships" => {
               "active-photographer" => {
-                "data" => { "type" => "photographer-people", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
+                "data" => { "type" => "photographer-accounts", "id" => "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9" }
               }
             }
           }
@@ -112,7 +112,7 @@ RSpec.describe JSONAPI::Realizer do
       end
 
       before do
-        People::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
+        Account::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
           id: "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9",
           name: "Kurtis Rainbolt-Greene"
         }
