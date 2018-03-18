@@ -51,11 +51,11 @@ module JSONAPI
         end
 
         def valid_sparse_field?(name)
-          attribute(name).fetch(:selectable)
+          attribute(name).selectable if attribute(name)
         end
 
         def valid_includes?(name)
-          relationship(name).fetch(:includable)
+          relationship(name).includable if relationship(name)
         end
 
         def has(name, selectable: true)
@@ -66,12 +66,12 @@ module JSONAPI
           relationships.public_send("#{name}=", OpenStruct.new({name: name, as: as, includable: includable}))
         end
 
-        def has_one(name, as: name, includable: true)
-          has_related(name, as: name, includable: includable)
+        def has_one(name, as: name.to_s.pluralize.dasherize, includable: true)
+          has_related(name, as: as.to_s.dasherize, includable: includable)
         end
 
-        def has_many(name, as: name, includable: true)
-          has_related(name, as: name, includable: includable)
+        def has_many(name, as: name.to_s.dasherize, includable: true)
+          has_related(name, as: as.to_s.dasherize, includable: includable)
         end
 
         def adapter
