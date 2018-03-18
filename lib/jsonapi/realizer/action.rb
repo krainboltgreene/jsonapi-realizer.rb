@@ -35,7 +35,7 @@ module JSONAPI
       end
 
       private def relation_after_fields(relation)
-        if includes.any?
+        if fields.any?
           resource_class.sparse_fields_call(relation, fields)
         else
           relation
