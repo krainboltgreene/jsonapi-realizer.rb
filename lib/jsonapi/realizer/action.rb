@@ -86,24 +86,54 @@ module JSONAPI
         )
       end
 
-      private def includes
+      def includes
+        return [] unless payload.key?("include")
+
         payload.
-          fetch("include", []).
+          fetch("include").
           # "carts.cart-items,carts.cart-items.product,carts.billing-information,payments"
-          map { |path| path.split(/\s*,\s*/) }.
+          split(/\s*,\s*/).
           # ["carts.cart-items", "carts.cart-items.product", "carts.billing-information", "payments"]
           map { |path| path.gsub("-", "_") }.
           # ["carts.cart_items", "carts.cart_items.product", "carts.billing_information", "payments"]
           map { |path| path.split(".") }.
           # [["carts", "cart_items"], ["carts", "cart_items", "product"], ["carts", "billing_information"], ["payments"]]
-          select(&resource_class.method(:valid_includes?))
+          select do |chain|
+            # ["carts", "cart_items"]
+            chain.reduce(resource_class) do |last_resource_class, key|
+              break unless last_resource_class
+
+              JSONAPI::Realizer.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class if last_resource_class.valid_includes?(key)
+            end
+          end
+          # [["carts", "cart_items", "product"], ["payments"]]
       end
 
-      private def fields
+      def fields
+        return [] unless payload.key?("fields")
+
         payload.
-          fetch("fields", []).
+          fetch("fields").
+          # "title,active-photographer.email,active-photographer.posts.title"
           split(/\s*,\s*/).
-          select(&resource_class.method(:valid_sparse_field?))
+          # ["title", "active-photographer.email", "active-photographer.posts.title"]
+          map { |path| path.gsub("-", "_") }.
+          # ["title", "active_photographer.email", "active_photographer.posts.title"]
+          map { |path| path.split(".") }.
+          # [["title"], ["active_photographer", "email"], ["active_photographer", "posts", "title"]]
+          select do |chain|
+            # ["active_photographer", "email"]
+            chain.reduce(resource_class) do |last_resource_class, key|
+              break unless last_resource_class
+
+              if last_resource_class.valid_includes?(key)
+                JSONAPI::Realizer.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class
+              elsif last_resource_class.valid_sparse_field?(key)
+                last_resource_class
+              end
+            end
+          end
+          # [["title"], ["active_photographer", "email"]]
       end
 
       private def configuration
