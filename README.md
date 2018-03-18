@@ -7,25 +7,6 @@
 
 This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into data models for your business logic.
 
-A successful JSON:API request can be annotated as:
-
-```
-JSONAPIRequest -> (BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)) -> JSONAPIResponse
-```
-
-The `jsonapi-serializers` library provides this shape:
-
-```
-JSONAPIRequest -> (Record | Array<Record>) -> JSONAPIResponse
-```
-
-But it leaves fetching/createing/updating/destroying the records up to you! This is where jsonapi-realizer comes into play, as it provides this shape:
-
-```
-BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)
-```
-
-
 ## Using
 
 In order to use this library you'll want to have some models:
@@ -59,7 +40,7 @@ class ProfileRealizer
 
   register :profiles, class_name: "Profile", adapter: :active_record
 
-  has_many :photos, as: :photos
+  has_many :photos
 
   has :name
 end
@@ -78,9 +59,6 @@ Once you've designed your resources, we just need to use them! In this example, 
 ``` ruby
 class PhotosController < ApplicationController
   def create
-    validate_parameters!
-    authenticate_session!
-
     realization = JSONAPI::Realizer.create(params, headers: request.headers)
 
     ProcessPhotosService.new(realization.model)
@@ -89,9 +67,6 @@ class PhotosController < ApplicationController
   end
 
   def index
-    validate_parameters!
-    authenticate_session!
-
     realization = JSONAPI::Realizer.index(params, headers: request.headers, type: :photos)
 
     # See: pundit for `authorize()`
@@ -99,6 +74,67 @@ class PhotosController < ApplicationController
 
     # See: pundit for `policy_scope()`
     render json: JSONAPI::Serializer.serialize(policy_scope(record), is_collection: true)
+  end
+end
+```
+
+### Policies
+
+Most times you will want to control what a person sees when they as for your data. We have created interfaces for this use-case and we'll show how you can use pundit (or any PORO) to constrain your in/out.
+
+First up is the policy itself:
+
+``` ruby
+class PhotoPolicy < ApplicationPolicy
+  class Scope < ApplicationPolicy::Scope
+    def resolve
+      case
+      when relation.with_role_state?(:administrator)
+        relation
+      when requester.with_onboarding_state?(:completed)
+        relation.where(photographer: requester)
+      else
+        relation.none
+      end
+    end
+
+    def sanitize(action, params)
+      case action
+      when :index
+        params.permit(:fields, :include, :filter)
+      else
+        params
+      end
+    end
+  end
+
+  def index?
+    requester.with_onboarding_state?(:completed)
+  end
+end
+```
+
+``` ruby
+class PhotoRealizer
+  include JSONAPI::Realizer::Resource
+
+  register :photos, class_name: "Photo", adapter: :active_record
+
+  has_one :photographer, as: :profiles
+
+  has :title
+  has :src
+end
+```
+
+``` ruby
+class PhotosController < ApplicationController
+  def index
+    realization = JSONAPI::Realizer.index(policy(Photo).sanitize(:index, params), headers: request.headers, type: :posts)
+
+    # See: pundit for `policy_scope()`
+    # See: pundit for `authorize()`
+    render json: JSONAPI::Serializer.serialize(authorize(policy_scope(realization.models)), is_collection: true)
   end
 end
 ```
@@ -121,7 +157,7 @@ An adapter must provide the following interfaces:
   0. `includes_via`, describes how to eager include related models
   0. `sparse_fields_via`, describes how to only return certain fields
 
-You can also provide custom adapter interfaces:
+You can also provide custom adapter interfaces like below, which will use `active_record`'s `find_many_via`, `assign_relationships_via`, `update_via`, `includes_via`, and `sparse_fields_via`:
 
 ``` ruby
 class PhotoRealizer
@@ -149,12 +185,32 @@ class PhotoRealizer
 end
 ```
 
+### Notes
+
+A successful JSON:API request can be annotated as:
+
+```
+JSONAPIRequest -> (BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)) -> JSONAPIResponse
+```
+
+The `jsonapi-serializers` library provides this shape:
+
+```
+JSONAPIRequest -> (Record | Array<Record>) -> JSONAPIResponse
+```
+
+But it leaves fetching/creating/updating/destroying the records up to you! This is where jsonapi-realizer comes into play, as it provides this shape:
+
+```
+BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)
+```
+
 
 ## Installing
 
 Add this line to your application's Gemfile:
 
-    gem "jsonapi-realizer", "2.0.0"
+    gem "jsonapi-realizer", "3.0.0"
 
 And then execute:
 
@@ -163,6 +219,10 @@ And then execute:
 Or install it yourself with:
 
     $ gem install jsonapi-realizer
+
+### Rails
+
+There's nothing extremely special about a rails application, but if you want to use jsonapi-realizer in development mode you'll probably want to turn on `eager_loading` (by setting it to `true` in `config/environments/development.rb`) or by adding `app/realizers` to the `eager_load_paths`.
 
 
 ## Contributing
