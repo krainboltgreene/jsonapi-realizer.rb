@@ -1,126 +1,10 @@
 require "pry"
 require "rspec"
-require "jsonapi-realizer"
 require "active_model"
+require "active_record"
+require "jsonapi-realizer"
 
-module MemoryStore
-  extend ActiveSupport::Concern
-
-  def create
-    assign_attributes(updated_at: Time.now, id: id || SecureRandom.uuid)
-    self.class.const_get("STORE")[id] = self.class.const_get("ATTRIBUTES").inject({}) do |hash, key|
-      hash.merge({ key => self.send(key) })
-    end
-  end
-
-  class_methods do
-    def fetch(id)
-      self.new(self.const_get("STORE").fetch(id))
-    end
-
-    def all
-      self.const_get("STORE").values.map(&method(:new))
-    end
-  end
-end
-
-class Photo
-  STORE = {}
-  ATTRIBUTES = [:id, :title, :alt_text, :src, :updated_at]
-
-  include ActiveModel::Model
-  include MemoryStore
-
-  attr_accessor :id
-  attr_accessor :title
-  attr_accessor :alt_text
-  attr_accessor :src
-  attr_accessor :updated_at
-  attr_accessor :active_photographer
-end
-
-class Account
-  STORE = {}
-  ATTRIBUTES = [:id, :name, :updated_at]
-
-  include ActiveModel::Model
-  include MemoryStore
-
-  attr_accessor :id
-  attr_accessor :name
-  attr_accessor :updated_at
-  attr_accessor :posts
-end
-
-class Post
-  STORE = {}
-  ATTRIBUTES = [:id, :title, :updated_at]
-
-  include ActiveModel::Model
-  include MemoryStore
-
-  attr_accessor :id
-  attr_accessor :title
-  attr_accessor :updated_at
-  attr_accessor :author
-end
-
-class Comment
-  STORE = {}
-  ATTRIBUTES = [:id, :body, :updated_at]
-
-  include ActiveModel::Model
-  include MemoryStore
-
-  attr_accessor :id
-  attr_accessor :body
-  attr_accessor :updated_at
-  attr_accessor :post
-end
-
-class PhotoRealizer
-  include JSONAPI::Realizer::Resource
-
-  register :photos, class_name: "Photo", adapter: :memory
-
-  has_one :active_photographer, as: :photographer_accounts
-
-  has :title
-  has :alt_text
-  has :src
-end
-
-class AccountRealizer
-  include JSONAPI::Realizer::Resource
-
-  register :photographer_accounts, class_name: "Account", adapter: :memory
-
-  has_many :photos
-  has_many :posts
-
-  has :name
-end
-
-class PostRealizer
-  include JSONAPI::Realizer::Resource
-
-  register :posts, class_name: "Post", adapter: :memory
-
-  has_one :author, as: :photographer_accounts
-  has_many :comments, includable: false
-
-  has :title
-end
-
-class CommentRealizer
-  include JSONAPI::Realizer::Resource
-
-  register :comments, class_name: "Comment", adapter: :memory
-
-  has_one :post
-
-  has :title
-end
+require_relative "support/memory"
 
 RSpec.configure do |let|
   # Enable flags like --only-failures and --next-failure
@@ -145,13 +29,59 @@ RSpec.configure do |let|
   # Output as a document string
   let.default_formatter = "doc"
 
-  let.before(:each) do
+  let.before(:each, memory: true) do
     Account::STORE.clear
     Photo::STORE.clear
+    Post::STORE.clear
+    Comment::STORE.clear
   end
 
-  let.after(:each) do
+  let.after(:each, memory: true) do
     Account::STORE.clear
     Photo::STORE.clear
+    Post::STORE.clear
+    Comment::STORE.clear
   end
+
+  let.before(:each, active_record: true) do
+    ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+  end
+
+  let.before(:each, active_record: true) do
+    ActiveRecord::Migration.create_table(:items, force: true) do |table|
+      table.integer :subtotal_cents, default: 0, null: false
+      table.integer :discount_cents, default: 0, null: false
+      table.integer :cart_id, null: false
+      table.text :metadata, default: "{}"
+      table.timestamps null: false
+    end
+  end
+
+  let.before(:each, active_record: true) do
+    ActiveRecord::Migration.create_table(:carts, force: true) do |table|
+      table.integer :discount_cents, default: 0, null: false
+      table.string :state, null: false
+      table.string :status, null: false, default: :started
+      table.integer :consumer_id, null: false
+      table.text :metadata, default: "{}"
+      table.timestamps null: false
+    end
+  end
+
+  let.before(:each, active_record: true) do
+    ActiveRecord::Migration.create_table(:consumers, force: true) do |table|
+      table.string :email, default: 0, null: false
+      table.integer :credit_cents, default: 0, null: false
+      table.text :metadata, default: "{}"
+      table.timestamps null: false
+    end
+  end
+
+  let.around(:each, active_record: true) do |example|
+    ActiveRecord::Base.transaction do
+      example.run
+      raise ActiveRecord::Rollback
+    end
+  end
+
 end

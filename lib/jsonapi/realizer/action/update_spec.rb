@@ -6,9 +6,82 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
   describe "#call" do
     subject { action.call }
 
-    context "with no top-level data and good headers"
-    context "with no top-level data and bad headers"
-    context "with a good payload and bad headers"
+    context "with no top-level data and no content-type header no accept headers" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {}
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::MissingContentTypeHeader)
+      end
+    end
+
+    context "with no top-level data and good content-type header no accept headers" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/vnd.api+json",
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::MissingAcceptHeader)
+      end
+    end
+
+    context "with no top-level data and wrong content-type header" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/json"
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::InvalidContentTypeHeader)
+      end
+    end
+
+    context "with no top-level data and good content-type header and wrong accept header" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/vnd.api+json",
+          "Accept" => "application/json"
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::InvalidAcceptHeader)
+      end
+    end
+
+    context "with wrong top-level data and good headers" do
+      let(:payload) do
+        {
+          "data" => ""
+        }
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/vnd.api+json",
+          "Accept" => "application/vnd.api+json"
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::MalformedDataRootProperty)
+      end
+    end
 
     context "with a good payload and good headers" do
       let(:payload) do
@@ -36,77 +109,83 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
         }
       end
 
-      before do
-        Account::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
-          id: "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9",
-          name: "Kurtis Rainbolt-Greene"
-        }
-        Photo::STORE["550e8400-e29b-41d4-a716-446655440000"] = {
-          id: "550e8400-e29b-41d4-a716-446655440000",
-          title: "Ember Hamster",
-          src: "http://example.com/images/productivity.png"
-        }
-      end
-
-      it "is the right model" do
-        subject
-
-        expect(action.model).to be_a_kind_of(Photo)
-      end
-
-      it "assigns the title attribute" do
-        subject
-
-        expect(action.model).to have_attributes(title: "Ember Hamster 2")
-      end
-
-      it "assigns the alt_text attribute" do
-        subject
-
-        expect(action.model).to have_attributes(alt_text: "A hamster logo.")
-      end
-
-      it "assigns the src attribute" do
-        subject
-
-        expect(action.model).to have_attributes(src: "http://example.com/images/productivity-2.png")
-      end
-
-      it "assigns the updated_at attribute" do
-        subject
-
-        expect(action.model).to have_attributes(updated_at: a_kind_of(Time))
-      end
-
-      it "assigns the active_photographer attribute" do
-        subject
-
-        expect(action.model).to have_attributes(active_photographer: a_kind_of(Account))
-      end
-
-      it "updates the record" do
-        expect {
+      shared_examples "api" do
+        it "is the right model" do
           subject
-        }.to change {
-          Photo::STORE
-        }.from(
-          {
-            "550e8400-e29b-41d4-a716-446655440000" => hash_including(
-              id: "550e8400-e29b-41d4-a716-446655440000",
-              title: "Ember Hamster",
-              src: "http://example.com/images/productivity.png"
-            )
+
+          expect(action.model).to be_a_kind_of(Photo)
+        end
+
+        it "assigns the title attribute" do
+          subject
+
+          expect(action.model).to have_attributes(title: "Ember Hamster 2")
+        end
+
+        it "assigns the alt_text attribute" do
+          subject
+
+          expect(action.model).to have_attributes(alt_text: "A hamster logo.")
+        end
+
+        it "assigns the src attribute" do
+          subject
+
+          expect(action.model).to have_attributes(src: "http://example.com/images/productivity-2.png")
+        end
+
+        it "assigns the updated_at attribute" do
+          subject
+
+          expect(action.model).to have_attributes(updated_at: a_kind_of(Time))
+        end
+
+        it "assigns the active_photographer attribute" do
+          subject
+
+          expect(action.model).to have_attributes(active_photographer: a_kind_of(Account))
+        end
+      end
+
+      context "in a memory store", memory: true do
+        before do
+          Account::STORE["4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9"] = {
+            id: "4b8a0af6-953d-4729-8b9a-1fa4eb18f3c9",
+            name: "Kurtis Rainbolt-Greene"
           }
-        ).to(
-          {
-            "550e8400-e29b-41d4-a716-446655440000" => hash_including(
-              id: "550e8400-e29b-41d4-a716-446655440000",
-              title: "Ember Hamster 2",
-              alt_text: "A hamster logo.",
-              src: "http://example.com/images/productivity-2.png"
-            )
+          Photo::STORE["550e8400-e29b-41d4-a716-446655440000"] = {
+            id: "550e8400-e29b-41d4-a716-446655440000",
+            title: "Ember Hamster",
+            src: "http://example.com/images/productivity.png"
           }
-        )
+        end
+
+        include_examples "api"
+
+        it "updates the record" do
+          expect {
+            subject
+          }.to change {
+            Photo::STORE
+          }.from(
+            {
+              "550e8400-e29b-41d4-a716-446655440000" => hash_including(
+                id: "550e8400-e29b-41d4-a716-446655440000",
+                title: "Ember Hamster",
+                src: "http://example.com/images/productivity.png"
+              )
+            }
+          ).to(
+            {
+              "550e8400-e29b-41d4-a716-446655440000" => hash_including(
+                id: "550e8400-e29b-41d4-a716-446655440000",
+                title: "Ember Hamster 2",
+                alt_text: "A hamster logo.",
+                src: "http://example.com/images/productivity-2.png"
+              )
+            }
+          )
+        end
       end
     end
   end

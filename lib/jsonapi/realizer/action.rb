@@ -7,9 +7,14 @@ module JSONAPI
       require_relative "action/index"
 
       attr_reader :payload
+      attr_reader :headers
 
-      def initialize
-        raise NoMethodError, "must implement this function"
+      def initialize(payload:, headers:)
+        raise Error::MissingAcceptHeader unless headers.key?("Accept")
+        raise Error::InvalidAcceptHeader unless headers.fetch("Accept") == "application/vnd.api+json"
+        raise Error::TooManyRootProperties if payload.key?("data") && payload.key?("errors")
+        raise Error::IncludeWithoutDataProperty if payload.key?("include") && !payload.key?("data")
+        raise Error::MalformedDataRootProperty unless payload.key?("data") && data.kind_of?(Array) || data.kind_of?(Hash) || data.nil?
       end
 
       def call; end
@@ -51,22 +56,18 @@ module JSONAPI
       end
 
       private def data
-        payload.fetch("data", {})
-      end
-
-      private def id
-        data.fetch("id", nil) || payload.fetch("id", nil)
+        payload.fetch("data")
       end
 
       private def type
-        (@type || data.fetch("type")).to_s.dasherize
+        data["type"].to_s.dasherize if data
       end
 
       private def attributes
         data.
           fetch("attributes", {}).
           transform_keys(&:underscore).
-          select(&resource_class.method(:valid_attribute?))
+          select(&resource_class.method(:valid_attribute?)) if data
       end
 
       private def relationships
@@ -74,7 +75,7 @@ module JSONAPI
           fetch("relationships", {}).
           transform_keys(&:underscore).
           select(&resource_class.method(:valid_relationship?)).
-          transform_values(&method(:as_relationship))
+          transform_values(&method(:as_relationship)) if data
       end
 
       private def as_relationship(value)

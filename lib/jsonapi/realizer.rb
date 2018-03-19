@@ -1,10 +1,12 @@
 require "ostruct"
 require "active_support/concern"
 require "active_support/core_ext/enumerable"
+require "active_support/core_ext/string"
 
 module JSONAPI
   module Realizer
     require_relative "realizer/version"
+    require_relative "realizer/error"
     require_relative "realizer/action"
     require_relative "realizer/adapter"
     require_relative "realizer/resource"
