@@ -4,11 +4,84 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
   let(:action) { described_class.new(payload: payload, headers: headers) }
 
   describe "#call" do
-    subject { action.call }
+    subject { action.tap(&:call) }
 
-    context "with no top-level data and good headers"
-    context "with no top-level data and bad headers"
-    context "with a good payload and bad headers"
+    context "with no top-level data and no content-type header no accept headers" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {}
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::MissingContentTypeHeader)
+      end
+    end
+
+    context "with no top-level data and good content-type header no accept headers" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/vnd.api+json",
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::MissingAcceptHeader)
+      end
+    end
+
+    context "with no top-level data and wrong content-type header" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/json"
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::InvalidContentTypeHeader)
+      end
+    end
+
+    context "with no top-level data and good content-type header and wrong accept header" do
+      let(:payload) do
+        {}
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/vnd.api+json",
+          "Accept" => "application/json"
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::InvalidAcceptHeader)
+      end
+    end
+
+    context "with wrong top-level data and good headers" do
+      let(:payload) do
+        {
+          "data" => ""
+        }
+      end
+      let(:headers) do
+        {
+          "Content-Type" => "application/vnd.api+json",
+          "Accept" => "application/vnd.api+json"
+        }
+      end
+
+      it "raises an exception" do
+        expect {subject}.to raise_exception(JSONAPI::Realizer::Error::MalformedDataRootProperty)
+      end
+    end
 
     context "with a good payload and good headers" do
       let(:payload) do

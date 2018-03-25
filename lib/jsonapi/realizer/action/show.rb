@@ -2,15 +2,12 @@ module JSONAPI
   module Realizer
     class Action
       class Show < Action
-
         attr_accessor :resource
 
-        def initialize(payload:, headers:, type:)
-          @payload = payload
-          @headers = headers
+        def initialize(payload:, headers:, scope: nil, type:)
           @type = type
 
-          super(payload: payload, headers: headers)
+          super(payload: payload, headers: headers, scope: scope)
 
           @resource = resource_class.new(adapter.find_via_call(relation, id))
         end

@@ -9,48 +9,52 @@ module JSONAPI
       attr_reader :payload
       attr_reader :headers
 
-      def initialize(payload:, headers:)
-        raise Error::MissingAcceptHeader unless headers.key?("Accept")
-        raise Error::InvalidAcceptHeader unless headers.fetch("Accept") == "application/vnd.api+json"
-        raise Error::TooManyRootProperties if payload.key?("data") && payload.key?("errors")
-        raise Error::IncludeWithoutDataProperty if payload.key?("include") && !payload.key?("data")
-        raise Error::MalformedDataRootProperty unless payload.key?("data") && data.kind_of?(Array) || data.kind_of?(Hash) || data.nil?
+      def initialize(payload:, headers:, scope: nil)
+        @scope = scope
+        @headers = headers
+        @payload = payload
+
+        raise Error::MissingAcceptHeader unless @headers.key?("Accept")
+        raise Error::InvalidAcceptHeader unless @headers.fetch("Accept") == JSONAPI::MEDIA_TYPE
+        raise Error::TooManyRootProperties if @payload.key?("data") && @payload.key?("errors")
+        raise Error::IncludeWithoutDataProperty if @payload.key?("include") && !@payload.key?("data")
+        raise Error::MalformedDataRootProperty unless @payload.key?("data") && data.kind_of?(Array) || data.kind_of?(Hash) || data.nil?
       end
 
       def call; end
 
       private def model_class
-        resource_class.model_class
+        resource_class.model_class if resource_class
       end
 
       private def resource_class
-        configuration.resource_class
+        configuration.resource_class if configuration
       end
 
       private def adapter
-        configuration.adapter
+        configuration.adapter if configuration
       end
 
-      private def relation_after_inclusion(relation)
+      private def relation_after_inclusion(subrelation)
         if includes.any?
-          resource_class.include_via_call(relation, includes)
+          resource_class.include_via_call(subrelation, includes)
         else
-          relation
+          subrelation
         end
       end
 
-      private def relation_after_fields(relation)
+      private def relation_after_fields(subrelation)
         if fields.any?
-          resource_class.sparse_fields_call(relation, fields)
+          resource_class.sparse_fields_call(subrelation, fields)
         else
-          relation
+          subrelation
         end
       end
 
       private def relation
         relation_after_fields(
           relation_after_inclusion(
-            model_class
+            @scope || model_class
           )
         )
       end
@@ -60,7 +64,7 @@ module JSONAPI
       end
 
       private def type
-        data["type"].to_s.dasherize if data
+        (@type || data["type"]).to_s.dasherize if @type || data
       end
 
       private def attributes
@@ -88,6 +92,7 @@ module JSONAPI
       end
 
       def includes
+        return [] unless payload.present?
         return [] unless payload.key?("include")
 
         payload.
@@ -111,6 +116,7 @@ module JSONAPI
       end
 
       def fields
+        return [] unless payload.present?
         return [] unless payload.key?("fields")
 
         payload.
@@ -138,7 +144,7 @@ module JSONAPI
       end
 
       private def configuration
-        JSONAPI::Realizer.type_mapping.fetch(type)
+        JSONAPI::Realizer.type_mapping.fetch(type) if type
       end
     end
   end

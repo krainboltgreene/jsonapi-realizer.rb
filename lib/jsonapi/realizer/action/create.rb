@@ -4,14 +4,11 @@ module JSONAPI
       class Create < Action
         attr_accessor :resource
 
-        def initialize(payload:, headers:)
-          @payload = payload
-          @headers = headers
-
+        def initialize(payload:, headers:, scope: nil)
           raise Error::MissingContentTypeHeader unless headers.key?("Content-Type")
-          raise Error::InvalidContentTypeHeader unless headers.fetch("Content-Type") == "application/vnd.api+json"
+          raise Error::InvalidContentTypeHeader unless headers.fetch("Content-Type") == JSONAPI::MEDIA_TYPE
 
-          super(payload: payload, headers: headers)
+          super(payload: payload, headers: headers, scope: scope)
 
           @resource = resource_class.new(relation.new)
 
