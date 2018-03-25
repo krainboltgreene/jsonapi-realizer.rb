@@ -4,7 +4,7 @@ require "active_support/core_ext/enumerable"
 require "active_support/core_ext/string"
 
 module JSONAPI
-  MEDIA_TYPE = "application/vnd.api+json"
+  MEDIA_TYPE = "application/vnd.api+json" unless const_defined?("MEDIA_TYPE")
 
   module Realizer
     require_relative "realizer/version"
