@@ -51,7 +51,7 @@ module JSONAPI
         end
       end
 
-      private def relation
+      def relation
         relation_after_fields(
           relation_after_inclusion(
             @scope || model_class
