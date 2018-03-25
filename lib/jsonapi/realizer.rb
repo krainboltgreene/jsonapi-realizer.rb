@@ -4,6 +4,8 @@ require "active_support/core_ext/enumerable"
 require "active_support/core_ext/string"
 
 module JSONAPI
+  MEDIA_TYPE = "application/vnd.api+json"
+
   module Realizer
     require_relative "realizer/version"
     require_relative "realizer/error"

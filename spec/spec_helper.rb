@@ -5,6 +5,7 @@ require "active_record"
 require "jsonapi-realizer"
 
 require_relative "support/memory"
+require_relative "support/example_action"
 
 RSpec.configure do |let|
   # Enable flags like --only-failures and --next-failure
@@ -83,5 +84,4 @@ RSpec.configure do |let|
       raise ActiveRecord::Rollback
     end
   end
-
 end
