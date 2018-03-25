@@ -24,7 +24,6 @@ module JSONAPI
           adapter.assign_attributes_via_call(resource.model, {id: id}) if id
           adapter.assign_attributes_via_call(resource.model, attributes)
           adapter.assign_relationships_via_call(resource.model, relationships)
-          adapter.create_via_call(resource.model)
         end
 
         def model

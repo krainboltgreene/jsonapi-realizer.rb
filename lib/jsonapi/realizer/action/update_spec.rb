@@ -4,7 +4,7 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
   let(:action) { described_class.new(payload: payload, headers: headers) }
 
   describe "#call" do
-    subject { action.call }
+    subject { action.tap(&:call) }
 
     context "with no top-level data and no content-type header no accept headers" do
       let(:payload) do
@@ -134,12 +134,6 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
           expect(action.model).to have_attributes(src: "http://example.com/images/productivity-2.png")
         end
 
-        it "assigns the updated_at attribute" do
-          subject
-
-          expect(action.model).to have_attributes(updated_at: a_kind_of(Time))
-        end
-
         it "assigns the active_photographer attribute" do
           subject
 
@@ -163,27 +157,11 @@ RSpec.describe JSONAPI::Realizer::Action::Update do
         include_examples "api"
 
         it "updates the record" do
-          expect {
-            subject
-          }.to change {
-            Photo::STORE
-          }.from(
-            {
-              "550e8400-e29b-41d4-a716-446655440000" => hash_including(
-                id: "550e8400-e29b-41d4-a716-446655440000",
-                title: "Ember Hamster",
-                src: "http://example.com/images/productivity.png"
-              )
-            }
-          ).to(
-            {
-              "550e8400-e29b-41d4-a716-446655440000" => hash_including(
-                id: "550e8400-e29b-41d4-a716-446655440000",
-                title: "Ember Hamster 2",
-                alt_text: "A hamster logo.",
-                src: "http://example.com/images/productivity-2.png"
-              )
-            }
+          expect(subject.model).to have_attributes(
+            id: "550e8400-e29b-41d4-a716-446655440000",
+            title: "Ember Hamster 2",
+            alt_text: "A hamster logo.",
+            src: "http://example.com/images/productivity-2.png"
           )
         end
       end

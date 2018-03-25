@@ -31,14 +31,6 @@ module JSONAPI
             end
           end)))
         end
-
-        create_via do |model|
-          model.create!
-        end
-
-        update_via do |model|
-          model.update!
-        end
       end
     end
   end

@@ -44,12 +44,6 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
           expect(action.model).to be_a_kind_of(Photo)
         end
 
-        it "assigns the id attribute" do
-          subject
-
-          expect(action.model).to have_attributes(id: "550e8400-e29b-41d4-a716-446655440000")
-        end
-
         it "assigns the title attribute" do
           subject
 
@@ -66,12 +60,6 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
           subject
 
           expect(action.model).to have_attributes(src: "http://example.com/images/productivity.png")
-        end
-
-        it "assigns the updated_at attribute" do
-          subject
-
-          expect(action.model).to have_attributes(updated_at: a_kind_of(Time))
         end
 
         it "assigns the active_photographer attribute" do
@@ -92,21 +80,10 @@ RSpec.describe JSONAPI::Realizer::Action::Create do
         include_examples "api"
 
         it "creates the new record" do
-          expect {
-            subject
-          }.to change {
-            Photo::STORE
-          }.from(
-            {}
-          ).to(
-            {
-              "550e8400-e29b-41d4-a716-446655440000" => hash_including(
-                id: "550e8400-e29b-41d4-a716-446655440000",
-                title: "Ember Hamster",
-                alt_text: "A hamster logo.",
-                src: "http://example.com/images/productivity.png"
-              )
-            }
+          expect(subject.model).to have_attributes(
+            title: "Ember Hamster",
+            alt_text: "A hamster logo.",
+            src: "http://example.com/images/productivity.png"
           )
         end
       end

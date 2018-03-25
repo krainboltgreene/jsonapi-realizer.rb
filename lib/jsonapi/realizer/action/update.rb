@@ -23,7 +23,6 @@ module JSONAPI
         def call
           adapter.assign_attributes_via_call(resource.model, attributes)
           adapter.assign_relationships_via_call(resource.model, relationships)
-          adapter.update_via_call(resource.model)
         end
 
         def model
