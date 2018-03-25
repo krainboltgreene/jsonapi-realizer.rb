@@ -33,20 +33,20 @@ module JSONAPI
       @mapping.index_by(&:type)
     end
 
-    def self.create(payload, headers:)
-      enact(Action::Create.new(payload: payload, headers: headers))
+    def self.create(payload, headers:, scope: nil)
+      enact(Action::Create.new(payload: payload, headers: headers, scope: scope))
     end
 
-    def self.update(payload, headers:)
-      enact(Action::Update.new(payload: payload, headers: headers))
+    def self.update(payload, headers:, scope: nil)
+      enact(Action::Update.new(payload: payload, headers: headers, scope: scope))
     end
 
-    def self.show(payload, headers:, type:)
-      enact(Action::Show.new(payload: payload, headers: headers, type: type))
+    def self.show(payload, headers:, type:, scope: nil)
+      enact(Action::Show.new(payload: payload, headers: headers, type: type, scope: scope))
     end
 
-    def self.index(payload, headers:, type:)
-      enact(Action::Index.new(payload: payload, headers: headers, type: type))
+    def self.index(payload, headers:, type:, scope: nil)
+      enact(Action::Index.new(payload: payload, headers: headers, type: type, scope: scope))
     end
 
     private_class_method def self.enact(action)
