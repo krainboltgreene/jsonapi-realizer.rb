@@ -183,9 +183,14 @@ class PhotoRealizer
 end
 ```
 
-### rails and jsonapi-realizer and jsonapi-serializers and pundit
+### rails
 
-While this gem contains nothing specifically targeting Rails or pundit or [jsonapi-serializers](https://github.com/fotinakis/jsonapi-serializers) (a fantastic gem) I've already written some seamless integration code. This root controller will handle exceptions in a graceful way and also give you access to a clean interface for serializing:
+If you want to use jsonapi-realizer in development mode you'll want to turn on `eager_loading` (by setting it to `true` in `config/environments/development.rb`) or by adding `app/realizers` to the `eager_load_paths`.
+
+
+### rails and pundit and jsonapi-serializers
+
+While this gem contains nothing specifically targeting rails or pundit or [jsonapi-serializers](https://github.com/fotinakis/jsonapi-serializers) (a fantastic gem) I've already written some seamless integration code. This root controller will handle exceptions in a graceful way and also give you access to a clean interface for serializing:
 
 ``` ruby
 module V1
@@ -332,10 +337,6 @@ And then execute:
 Or install it yourself with:
 
     $ gem install jsonapi-realizer
-
-### Rails
-
-There's nothing extremely special about a rails application, but if you want to use jsonapi-realizer in development mode you'll probably want to turn on `eager_loading` (by setting it to `true` in `config/environments/development.rb`) or by adding `app/realizers` to the `eager_load_paths`.
 
 
 ## Contributing
