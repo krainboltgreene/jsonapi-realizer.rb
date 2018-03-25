@@ -323,7 +323,7 @@ BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)
 
 Add this line to your application's Gemfile:
 
-    gem "jsonapi-realizer", "3.0.0"
+    gem "jsonapi-realizer", "4.1.0"
 
 And then execute:
 
