@@ -183,6 +183,121 @@ class PhotoRealizer
 end
 ```
 
+### rails and jsonapi-realizer and jsonapi-serializers and pundit
+
+While this gem contains nothing specifically targeting Rails or pundit or [jsonapi-serializers](https://github.com/fotinakis/jsonapi-serializers) (a fantastic gem) I've already written some seamless integration code. This root controller will handle exceptions in a graceful way and also give you access to a clean interface for serializing:
+
+``` ruby
+module V1
+  class ApplicationController < ::ApplicationController
+    include Pundit
+
+    after_action :verify_authorized, except: :index
+    after_action :verify_policy_scoped, only: :index
+
+    rescue_from JSONAPI::Realizer::Error::MissingAcceptHeader, with: :missing_accept_header
+    rescue_from JSONAPI::Realizer::Error::InvalidAcceptHeader, with: :invalid_accept_header
+    rescue_from Pundit::NotAuthorizedError, with: :access_not_authorized
+
+    private def missing_accept_header
+      head :not_acceptable
+    end
+
+    private def invalid_accept_header
+      head :not_acceptable
+    end
+
+    private def access_not_authorized
+      head :unauthorized
+    end
+
+    private def pundit_user
+      current_account
+    end
+
+    private def serialize(realization)
+      JSONAPI::Serializer.serialize(
+        if realization.respond_to?(:models) then realization.models else realization.model end,
+        is_collection: realization.respond_to?(:models),
+        meta: serialized_metadata,
+        links: serialized_links,
+        jsonapi: serialized_jsonapi,
+        fields: serialized_fields(realization),
+        include: serialized_includes(realization),
+        namespace: ::V1
+      )
+    end
+
+    private def serialized_metadata
+      {
+        api: {
+          version: "1"
+        }
+      }
+    end
+
+    private def serialized_links
+      {
+        discovery: {
+          href: "/"
+        }
+      }
+    end
+
+    private def serialized_jsonapi
+      {
+        version: "1.0"
+      }
+    end
+
+    private def serialized_fields(realization)
+      realization.fields if realization.fields.any?
+    end
+
+    private def serialized_includes(realization)
+      realization.includes if realization.includes.any?
+    end
+  end
+end
+```
+
+You can see this resource controller used below:
+
+``` ruby
+module V1
+  class AccountsController < ::V1::ApplicationController
+    def index
+      realization = JSONAPI::Realizer.index(
+        policy(Account).sanitize(:index, params),
+        headers: request.headers,
+        scope: policy_scope(Account),
+        type: :accounts
+      )
+
+      authorize realization.relation
+
+      render json: serialize(realization)
+    end
+
+    def create
+      realization = JSONAPI::Realizer.create(
+        policy(Account).sanitize(:create, params),
+        headers: request.headers,
+        scope: policy_scope(Account)
+      )
+
+      authorize realization.relation
+
+      render json: serialize(realization)
+    end
+  end
+end
+```
+
+### jsonapi-home
+
+I'm already using jsonapi-realizer and it's sister project jsonapi-serializers in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home).
+
 ### Notes
 
 A successful JSON:API request can be annotated as:
