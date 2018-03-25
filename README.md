@@ -63,7 +63,7 @@ class PhotosController < ApplicationController
 
     ProcessPhotosService.new(realization.model)
 
-    render json: JSONAPI::Serializer.serialize(record)
+    render json: JSONAPI::Serializer.serialize(realization.model)
   end
 
   def index
@@ -128,6 +128,7 @@ end
 ``` ruby
 class PhotosController < ApplicationController
   def index
+    # See: pundit for `policy_scope()`
     realization = JSONAPI::Realizer.index(
       policy(Photo).sanitize(:index, params),
       headers: request.headers,
@@ -135,9 +136,10 @@ class PhotosController < ApplicationController
       relation: policy_scope(Photo)
     )
 
-    # See: pundit for `policy_scope()`
     # See: pundit for `authorize()`
-    render json: JSONAPI::Serializer.serialize(authorize(realization.models), is_collection: true)
+    authorize(realization.relation)
+
+    render json: JSONAPI::Serializer.serialize(realization.models, is_collection: true)
   end
 end
 ```
