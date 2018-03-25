@@ -69,14 +69,12 @@ class PhotosController < ApplicationController
   def index
     realization = JSONAPI::Realizer.index(params, headers: request.headers, type: :photos)
 
-    # See: pundit for `authorize()`
-    authorize realization.models
-
-    # See: pundit for `policy_scope()`
-    render json: JSONAPI::Serializer.serialize(policy_scope(record), is_collection: true)
+    render json: JSONAPI::Serializer.serialize(realization.models, is_collection: true)
   end
 end
 ```
+
+Notice that we pass `realization.model` to `ProcessPhotosService`, that's because `jsonapi-realizer` doesn't do the act of saving, creating, or destroying! We just ready up the records for you to handle (including errors).
 
 ### Policies
 
@@ -130,11 +128,16 @@ end
 ``` ruby
 class PhotosController < ApplicationController
   def index
-    realization = JSONAPI::Realizer.index(policy(Photo).sanitize(:index, params), headers: request.headers, type: :posts)
+    realization = JSONAPI::Realizer.index(
+      policy(Photo).sanitize(:index, params),
+      headers: request.headers,
+      type: :posts,
+      relation: policy_scope(Photo)
+    )
 
     # See: pundit for `policy_scope()`
     # See: pundit for `authorize()`
-    render json: JSONAPI::Serializer.serialize(authorize(policy_scope(realization.models)), is_collection: true)
+    render json: JSONAPI::Serializer.serialize(authorize(realization.models), is_collection: true)
   end
 end
 ```
@@ -152,8 +155,6 @@ An adapter must provide the following interfaces:
   0. `find_many_via`, describes how to find many models
   0. `assign_attributes_via`, describes how to write a set of properties
   0. `assign_relationships_via`, describes how to write a set of relationships
-  0. `create_via`, describes how to create the model
-  0. `update_via`, describes how to update the model
   0. `includes_via`, describes how to eager include related models
   0. `sparse_fields_via`, describes how to only return certain fields
 
@@ -171,11 +172,6 @@ class PhotoRealizer
 
   adapter.assign_attributes_via do |model, attributes|
     model.update_columns(attributes)
-  end
-
-  adapter.create_via do |model|
-    model.save!
-    Rails.cache.write(model.cache_key, model)
   end
 
   has_one :photographer, as: :profiles
