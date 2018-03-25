@@ -5,6 +5,7 @@ module JSONAPI
       require_relative "action/update"
       require_relative "action/show"
       require_relative "action/index"
+      require_relative "action/destroy"
 
       attr_reader :payload
       attr_reader :headers

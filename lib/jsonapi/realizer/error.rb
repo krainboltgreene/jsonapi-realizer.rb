@@ -9,7 +9,6 @@ module JSONAPI
       require_relative "error/missing_content_type_header"
       require_relative "error/missing_root_property"
       require_relative "error/missing_type_resource_property"
-      require_relative "error/too_many_root_properties"
     end
   end
 end
