@@ -1,6 +1,6 @@
 # jsonapi-realizer
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-realizer.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-realizer)
+  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-realizer.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-realizer.rb)
   - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
   - [![Version](http://img.shields.io/gem/v/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
 
@@ -21,7 +21,9 @@ class Profile < ApplicationRecord
 end
 ```
 
-*They don't have to be ActiveRecord* models, but we have built-in support for that library (adapter-based). Second you'll need some realizers:
+*Note: They don't have to be ActiveRecord models, but we have built-in support for that library (adapter-based).*
+
+Second you'll need some realizers:
 
 ``` ruby
 class PhotoRealizer
