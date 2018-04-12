@@ -43,20 +43,8 @@ module JSONAPI
         end
       end
 
-      private def relation_after_fields(subrelation)
-        if fields.any?
-          resource_class.sparse_fields_call(subrelation, fields)
-        else
-          subrelation
-        end
-      end
-
       def relation
-        relation_after_fields(
-          relation_after_inclusion(
-            @scope || model_class
-          )
-        )
+        relation_after_inclusion(@scope || model_class)
       end
 
       private def data
@@ -113,34 +101,6 @@ module JSONAPI
             end
           end
           # [["carts", "cart_items", "product"], ["payments"]]
-      end
-
-      def fields
-        return [] unless payload.present?
-        return [] unless payload.key?("fields")
-
-        payload.
-          fetch("fields").
-          # "title,active-photographer.email,active-photographer.posts.title"
-          split(/\s*,\s*/).
-          # ["title", "active-photographer.email", "active-photographer.posts.title"]
-          map { |path| path.gsub("-", "_") }.
-          # ["title", "active_photographer.email", "active_photographer.posts.title"]
-          map { |path| path.split(".") }.
-          # [["title"], ["active_photographer", "email"], ["active_photographer", "posts", "title"]]
-          select do |chain|
-            # ["active_photographer", "email"]
-            chain.reduce(resource_class) do |last_resource_class, key|
-              break unless last_resource_class
-
-              if last_resource_class.valid_includes?(key)
-                JSONAPI::Realizer.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class
-              elsif last_resource_class.valid_sparse_field?(key)
-                last_resource_class
-              end
-            end
-          end
-          # [["title"], ["active_photographer", "email"]]
       end
 
       private def configuration

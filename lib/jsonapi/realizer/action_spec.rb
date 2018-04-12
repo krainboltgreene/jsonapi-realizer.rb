@@ -26,21 +26,4 @@ RSpec.describe JSONAPI::Realizer::Action do
       end
     end
   end
-
-  describe "#fields" do
-    subject { action.fields }
-
-    context "with a two good and one bad" do
-      let(:payload) do
-        {
-          "data" => nil,
-          "fields" => "title,active_photographer.posts.comments.body,active_photographer.name"
-        }
-      end
-
-      it "contains only the two good" do
-        expect(subject).to eq([["title"], ["active_photographer", "name"]])
-      end
-    end
-  end
 end
