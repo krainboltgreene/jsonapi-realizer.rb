@@ -1,6 +1,6 @@
 # jsonapi-realizer
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-realizer.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-realizer.rb)
+  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-realizer.rb.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-realizer.rb)
   - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
   - [![Version](http://img.shields.io/gem/v/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
 
