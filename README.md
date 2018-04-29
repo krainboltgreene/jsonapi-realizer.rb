@@ -48,12 +48,10 @@ class ProfileRealizer
 end
 ```
 
-You can define special properties on attributes and relationships realizers:
+You can define special properties on relationships realizers:
 
 ``` ruby
 has_many :doctors, as: :users, includable: false
-
-has :title, selectable: false
 ```
 
 Once you've designed your resources, we just need to use them! In this example, we'll use controllers from Rails:
@@ -160,9 +158,8 @@ An adapter must provide the following interfaces:
   0. `assign_attributes_via`, describes how to write a set of properties
   0. `assign_relationships_via`, describes how to write a set of relationships
   0. `includes_via`, describes how to eager include related models
-  0. `sparse_fields_via`, describes how to only return certain fields
 
-You can also provide custom adapter interfaces like below, which will use `active_record`'s `find_many_via`, `assign_relationships_via`, `update_via`, `includes_via`, and `sparse_fields_via`:
+You can also provide custom adapter interfaces like below, which will use `active_record`'s `find_many_via`, `assign_relationships_via`, `update_via`, and `includes_via`:
 
 ``` ruby
 class PhotoRealizer

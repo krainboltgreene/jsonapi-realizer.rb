@@ -18,10 +18,6 @@ module JSONAPI
           model.assign_attributes(relationships)
         end
 
-        sparse_fields do |model_class, fields|
-          model_class
-        end
-
         include_via do |model_class, includes|
           model_class
         end

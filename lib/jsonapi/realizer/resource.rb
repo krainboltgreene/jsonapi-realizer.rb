@@ -50,16 +50,12 @@ module JSONAPI
           relationships.respond_to?(name.to_sym)
         end
 
-        def valid_sparse_field?(name)
-          attribute(name).selectable if attribute(name)
-        end
-
         def valid_includes?(name)
           relationship(name).includable if relationship(name)
         end
 
-        def has(name, selectable: true)
-          attributes.public_send("#{name}=", OpenStruct.new({name: name, selectable: selectable}))
+        def has(name)
+          attributes.public_send("#{name}=", OpenStruct.new({name: name}))
         end
 
         def has_related(name, as: name, includable: true)

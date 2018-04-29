@@ -20,7 +20,6 @@ module JSONAPI
         raise ArgumentError, "need to provide a Adapter.find_many_via_call interface" unless instance_variable_defined?(:@find_many_via_call)
         raise ArgumentError, "need to provide a Adapter.assign_attributes_via interface" unless instance_variable_defined?(:@assign_attributes_via_call)
         raise ArgumentError, "need to provide a Adapter.assign_relationships_via interface" unless instance_variable_defined?(:@assign_relationships_via_call)
-        raise ArgumentError, "need to provide a Adapter.sparse_fields interface" unless instance_variable_defined?(:@sparse_fields_call)
         raise ArgumentError, "need to provide a Adapter.include_via interface" unless instance_variable_defined?(:@include_via_call)
       end
 
@@ -38,10 +37,6 @@ module JSONAPI
 
       def assign_relationships_via(&callback)
         @assign_relationships_via_call = callback
-      end
-
-      def sparse_fields(&callback)
-        @sparse_fields_call = callback
       end
 
       def include_via(&callback)
@@ -62,10 +57,6 @@ module JSONAPI
 
       def assign_relationships_via_call(model, relationships)
         @assign_relationships_via_call.call(model, relationships)
-      end
-
-      def sparse_fields_call(model_class, fields)
-        @sparse_fields_call.call(model_class, fields)
       end
 
       def include_via_call(model_class, includes)

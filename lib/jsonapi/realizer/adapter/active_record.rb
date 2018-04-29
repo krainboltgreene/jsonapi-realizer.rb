@@ -18,10 +18,6 @@ module JSONAPI
           model.assign_attributes(relationships)
         end
 
-        sparse_fields do |model_class, fields|
-          model_class.select(fields)
-        end
-
         include_via do |model_class, includes|
           model_class.includes(includes.map(&(recursively_nest = -> (chains) do
             if chains.size == 1
