@@ -6,7 +6,7 @@ module JSONAPI
 
         def initialize(payload:, headers:, scope: nil)
           raise Error::MissingContentTypeHeader unless headers.key?("Content-Type")
-          raise Error::InvalidContentTypeHeader, given: headers.fetch("Content-Type"), accepted: JSONAPI::MEDIA_TYPE unless headers.fetch("Content-Type") == JSONAPI::MEDIA_TYPE
+          raise Error::InvalidContentTypeHeader, given: headers.fetch("Content-Type"), wanted: JSONAPI::MEDIA_TYPE unless headers.fetch("Content-Type") == JSONAPI::MEDIA_TYPE
 
           super(payload: payload, headers: headers, scope: scope)
 
