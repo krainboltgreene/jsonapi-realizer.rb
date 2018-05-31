@@ -8,7 +8,7 @@ module JSONAPI
         end
         
         def message
-          "HTTP Header recieved is #{@given}, but expected #{@wanted}"
+          "HTTP Accept Header recieved is #{@given}, but expected #{@wanted}"
         end
       end
     end
