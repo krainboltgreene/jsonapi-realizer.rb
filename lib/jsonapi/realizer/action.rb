@@ -83,12 +83,23 @@ module JSONAPI
       end
 
       private def as_relationship(value)
-        data = value.fetch("data")
-        mapping = JSONAPI::Realizer.type_mapping.fetch(data.fetch("type"))
-        mapping.adapter.find_via_call(
-          mapping.model_class,
-          data.fetch("id")
-        )
+        if value.kind_of?(Array)
+          data = value.fetch("data")
+          mapping = JSONAPI::Realizer.type_mapping.fetch(data.fetch("type"))
+          mapping.adapter.find_via_call(
+            mapping.model_class,
+            data.fetch("id")
+          )
+        else
+          value.map do |member|
+            data = member.fetch("data")
+            mapping = JSONAPI::Realizer.type_mapping.fetch(data.fetch("type"))
+            mapping.adapter.find_via_call(
+              mapping.model_class,
+              data.fetch("id")
+            )
+          end
+        end
       end
 
       def includes
