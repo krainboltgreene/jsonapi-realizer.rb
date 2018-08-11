@@ -9,6 +9,7 @@ module JSONAPI
       require_relative "error/missing_content_type_header"
       require_relative "error/missing_root_property"
       require_relative "error/missing_type_resource_property"
+      require_relative "error/duplicate_registration"
     end
   end
 end

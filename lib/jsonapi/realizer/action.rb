@@ -94,7 +94,7 @@ module JSONAPI
           end
         else
           data = value.fetch("data")
-          mapping = JSONAPI::Realizer.type_mapping.fetch(data.fetch("type"))
+          mapping = JSONAPI::Realizer::Resource.type_mapping.fetch(data.fetch("type"))
           mapping.adapter.find_via_call(
             mapping.model_class,
             data.fetch("id")
@@ -120,7 +120,7 @@ module JSONAPI
             chain.reduce(resource_class) do |last_resource_class, key|
               break unless last_resource_class
 
-              JSONAPI::Realizer.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class if last_resource_class.valid_includes?(key)
+              JSONAPI::Realizer::Resource.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class if last_resource_class.valid_includes?(key)
             end
           end
           # [["carts", "cart_items", "product"], ["payments"]]
@@ -145,7 +145,7 @@ module JSONAPI
               break unless last_resource_class
 
               if last_resource_class.valid_includes?(key)
-                JSONAPI::Realizer.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class
+                JSONAPI::Realizer::Resource.type_mapping.fetch(last_resource_class.relationship(key).as).resource_class
               elsif last_resource_class.valid_sparse_field?(key)
                 last_resource_class
               end
@@ -155,7 +155,7 @@ module JSONAPI
       end
 
       private def configuration
-        JSONAPI::Realizer.type_mapping.fetch(type) if type
+        JSONAPI::Realizer::Resource.type_mapping.fetch(type) if type
       end
     end
   end

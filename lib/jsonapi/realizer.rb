@@ -13,26 +13,6 @@ module JSONAPI
     require_relative "realizer/adapter"
     require_relative "realizer/resource"
 
-    def self.register(resource_class:, model_class:, adapter:, type:)
-      @mapping ||= Set.new
-      @mapping << OpenStruct.new({
-        resource_class: resource_class,
-        model_class: model_class,
-        adapter: adapter,
-        type: type.dasherize,
-        attributes: OpenStruct.new({}),
-        relationships: OpenStruct.new({})
-       })
-    end
-
-    def self.resource_mapping
-      @mapping.index_by(&:resource_class)
-    end
-
-    def self.type_mapping
-      @mapping.index_by(&:type)
-    end
-
     def self.create(payload, headers:, scope: nil)
       enact(Action::Create.new(payload: payload, headers: headers, scope: scope))
     end

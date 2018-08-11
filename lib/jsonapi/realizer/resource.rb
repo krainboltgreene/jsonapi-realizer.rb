@@ -5,6 +5,27 @@ module JSONAPI
 
       attr_reader :model
 
+      def self.register(resource_class:, model_class:, adapter:, type:)
+        @mapping ||= Set.new
+        raise JSONAPI::Realizer::Error::DuplicateRegistration if @mapping.any? { |realizer| realizer.type == type }
+        @mapping << OpenStruct.new({
+          resource_class: resource_class,
+          model_class: model_class,
+          adapter: adapter,
+          type: type.dasherize,
+          attributes: OpenStruct.new({}),
+          relationships: OpenStruct.new({})
+         })
+      end
+
+      def self.resource_mapping
+        @mapping.index_by(&:resource_class)
+      end
+
+      def self.type_mapping
+        @mapping.index_by(&:type)
+      end
+
       def initialize(model)
         @model = model
       end
@@ -91,7 +112,7 @@ module JSONAPI
         end
 
         def register(type, class_name:, adapter:)
-          JSONAPI::Realizer.register(
+          JSONAPI::Realizer::Resource.register(
             resource_class: self,
             model_class: class_name.constantize,
             adapter: JSONAPI::Realizer::Adapter.new(adapter),
@@ -100,7 +121,7 @@ module JSONAPI
         end
 
         def configuration
-          JSONAPI::Realizer.resource_mapping.fetch(self)
+          JSONAPI::Realizer::Resource.resource_mapping.fetch(self)
         end
       end
     end

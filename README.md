@@ -135,7 +135,7 @@ class PhotosController < ApplicationController
       policy(Photo).sanitize(:index, params),
       headers: request.headers,
       type: :posts,
-      relation: policy_scope(Photo)
+      scope: policy_scope(Photo)
     )
 
     # See: pundit for `authorize()`
