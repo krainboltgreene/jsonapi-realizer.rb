@@ -16,9 +16,9 @@ module JSONAPI
         @payload = payload
 
         raise Error::MissingAcceptHeader unless @headers.key?("Accept")
-        raise Error::InvalidAcceptHeader unless @headers.fetch("Accept") == JSONAPI::MEDIA_TYPE
+        raise Error::InvalidAcceptHeader, given: @headers.fetch("Accept"), wanted: JSONAPI::MEDIA_TYPE unless @headers.fetch("Accept") == JSONAPI::MEDIA_TYPE
         raise Error::IncludeWithoutDataProperty if @payload.key?("include") && !@payload.key?("data")
-        raise Error::MalformedDataRootProperty if @payload.key?("data") && !(data.kind_of?(Array) || data.kind_of?(Hash) || data.nil?)
+        raise Error::MalformedDataRootProperty, given: data if @payload.key?("data") && !(data.kind_of?(Array) || data.kind_of?(Hash) || data.nil?)
       end
 
       def call; end
