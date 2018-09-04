@@ -310,11 +310,7 @@ I'm already using jsonapi-realizer and it's sister project jsonapi-serializers i
 
 Add this line to your application's Gemfile:
 
-    gem "jsonapi-realizer", "4.1.0"
-
-And then execute:
-
-    $ bundle
+    $ bundle add jsonapi-realizer
 
 Or install it yourself with:
 
