@@ -303,7 +303,7 @@ end
 
 ### jsonapi-home
 
-I'm already using jsonapi-realizer and it's sister project jsonapi-serializers in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home).
+I'm already using jsonapi-realizer and it's sister project jsonapi-serializers in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 ### Notes
 
