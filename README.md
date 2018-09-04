@@ -305,26 +305,6 @@ end
 
 I'm already using jsonapi-realizer and it's sister project jsonapi-serializers in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
-### Notes
-
-A successful JSON:API request can be annotated as:
-
-```
-JSONAPIRequest -> (BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)) -> JSONAPIResponse
-```
-
-The `jsonapi-serializers` library provides this shape:
-
-```
-JSONAPIRequest -> (Record | Array<Record>) -> JSONAPIResponse
-```
-
-But it leaves fetching/creating/updating/destroying the records up to you! This is where jsonapi-realizer comes into play, as it provides this shape:
-
-```
-BusinessLayer -> JSONAPIRequest -> (Record | Array<Record>)
-```
-
 
 ## Installing
 
