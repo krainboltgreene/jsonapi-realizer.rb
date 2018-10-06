@@ -1,4 +1,5 @@
-require "spec_helper"
+require("spec_helper")
 
-RSpec.describe JSONAPI::Realizer::Adapter do
+RSpec.describe(JSONAPI::Realizer::Adapter) do
+
 end

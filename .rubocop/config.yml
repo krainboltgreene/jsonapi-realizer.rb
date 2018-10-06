@@ -145,7 +145,7 @@ Layout/DefEndAlignment:
   Description: Align ends corresponding to defs correctly.
   Enabled: true
 Layout/DotPosition:
-  EnforcedStyle: leading
+  EnforcedStyle: trailing
   SupportedStyles:
     - leading
     - trailing

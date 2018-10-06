@@ -1,13 +1,14 @@
 module JSONAPI
   module Realizer
     class Adapter
-      require_relative "adapter/active_record"
       require_relative "adapter/memory"
+      require_relative("adapter/active_record")
 
       MAPPINGS = {
         memory: JSONAPI::Realizer::Adapter::MEMORY,
-        active_record: JSONAPI::Realizer::Adapter::ACTIVE_RECORD,
+        :active_record => JSONAPI::Realizer::Adapter::ActiveRecord
       }
+      private_constant :MAPPINGS
 
       def initialize(interface)
         if JSONAPI::Realizer::Adapter::MAPPINGS.key?(interface.to_sym)

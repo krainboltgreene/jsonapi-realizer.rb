@@ -1,6 +1,7 @@
-require "spec_helper"
+require("spec_helper")
 
-RSpec.describe JSONAPI::Realizer do
+RSpec.describe(JSONAPI::Realizer::Resource) do
+
   describe ".register" do
     subject {JSONAPI::Realizer::Resource.register(resource_class: "Test", model_class: "test", adapter: :a, type: "a")}
     context "with something already owning that type" do

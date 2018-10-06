@@ -1,8 +1,8 @@
-require "pry"
-require "rspec"
-require "active_model"
-require "active_record"
-require "jsonapi-realizer"
+require("pry")
+require("rspec")
+require("active_model")
+require("active_record")
+require("jsonapi-realizer")
 
 require_relative "support/memory"
 require_relative "support/example_action"
