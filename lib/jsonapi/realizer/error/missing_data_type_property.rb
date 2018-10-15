@@ -1,7 +1,7 @@
 module JSONAPI
   module Realizer
     class Error
-      class MissingTypeResourceProperty < Error
+      class MissingDataTypeProperty < Error
 
       end
     end

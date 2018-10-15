@@ -1,76 +1,38 @@
 module JSONAPI
   module Realizer
     class Adapter
-      require_relative "adapter/memory"
+      include(ActiveModel::Model)
+
       require_relative("adapter/active_record")
 
       MAPPINGS = {
-        memory: JSONAPI::Realizer::Adapter::MEMORY,
         :active_record => JSONAPI::Realizer::Adapter::ActiveRecord
       }
       private_constant :MAPPINGS
 
-      def initialize(interface)
-        if JSONAPI::Realizer::Adapter::MAPPINGS.key?(interface.to_sym)
-          instance_eval(&JSONAPI::Realizer::Adapter::MAPPINGS.fetch(interface.to_sym))
-        else
-          raise ArgumentError, "you've given an invalid adapter alias: #{interface}, we support #{JSONAPI::Realizer::Adapter::MAPPINGS.keys}"
+      attr_accessor :interface
+
+      validates_presence_of(:interface)
+
+      def initialize(interface:)
+        super(interface: interface)
+
+        validate!
+
+        mappings = MAPPINGS.merge(JSONAPI::Realizer.configuration.adapter_mappings).with_indifferent_access
+
+        unless mappings.key?(interface)
+          raise(ArgumentError, "you've given an invalid adapter alias: #{interface}, we support #{mappings.keys.to_sentence}")
         end
 
-        raise ArgumentError, "need to provide a Adapter.find_via interface" unless instance_variable_defined?(:@find_via_call)
-        raise ArgumentError, "need to provide a Adapter.find_many_via_call interface" unless instance_variable_defined?(:@find_many_via_call)
-        raise ArgumentError, "need to provide a Adapter.assign_attributes_via interface" unless instance_variable_defined?(:@assign_attributes_via_call)
-        raise ArgumentError, "need to provide a Adapter.assign_relationships_via interface" unless instance_variable_defined?(:@assign_relationships_via_call)
-        raise ArgumentError, "need to provide a Adapter.sparse_fields interface" unless instance_variable_defined?(:@sparse_fields_call)
-        raise ArgumentError, "need to provide a Adapter.include_via interface" unless instance_variable_defined?(:@include_via_call)
-      end
+        self.singleton_class.prepend(mappings.fetch(interface))
 
-      def find_via(&callback)
-        @find_via_call = callback
-      end
-
-      def find_many_via(&callback)
-        @find_many_via_call = callback
-      end
-
-      def assign_attributes_via(&callback)
-        @assign_attributes_via_call = callback
-      end
-
-      def assign_relationships_via(&callback)
-        @assign_relationships_via_call = callback
-      end
-
-      def sparse_fields(&callback)
-        @sparse_fields_call = callback
-      end
-
-      def include_via(&callback)
-        @include_via_call = callback
-      end
-
-      def find_via_call(model_class, id)
-        @find_via_call.call(model_class, id)
-      end
-
-      def find_many_via_call(model_class)
-        @find_many_via_call.call(model_class)
-      end
-
-      def assign_attributes_via_call(model, attributes)
-        @assign_attributes_via_call.call(model, attributes)
-      end
-
-      def assign_relationships_via_call(model, relationships)
-        @assign_relationships_via_call.call(model, relationships)
-      end
-
-      def sparse_fields_call(model_class, fields)
-        @sparse_fields_call.call(model_class, fields)
-      end
-
-      def include_via_call(model_class, includes)
-        @include_via_call.call(model_class, includes)
+        raise(ArgumentError, "need to provide a Adapter#find_one interface") unless respond_to?(:find_one)
+        raise(ArgumentError, "need to provide a Adapter#find_many interface") unless respond_to?(:find_many)
+        raise(ArgumentError, "need to provide a Adapter#write_attributes interface") unless respond_to?(:write_attributes)
+        raise(ArgumentError, "need to provide a Adapter#write_relationships interface") unless respond_to?(:write_relationships)
+        raise(ArgumentError, "need to provide a Adapter#include_relationships interface") unless respond_to?(:include_relationships)
+        raise(ArgumentError, "need to provide a Adapter#paginate interface") unless respond_to?(:paginate)
       end
     end
   end

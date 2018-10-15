@@ -51,9 +51,9 @@ end
 You can define special properties on attributes and relationships realizers:
 
 ``` ruby
-has_many :doctors, as: :users, includable: false
+has_many :doctors, as: :users, visible: false
 
-has :title, selectable: false
+has :title, visible: false
 ```
 
 Once you've designed your resources, we just need to use them! In this example, we'll use controllers from Rails:
@@ -155,14 +155,14 @@ There are two core adapters:
 
 An adapter must provide the following interfaces:
 
-  0. `find_via`, describes how to find the model
-  0. `find_many_via`, describes how to find many models
-  0. `assign_attributes_via`, describes how to write a set of properties
-  0. `assign_relationships_via`, describes how to write a set of relationships
+  0. `find_one`, describes how to find the model
+  0. `find_many`, describes how to find many models
+  0. `write_attributes`, describes how to write a set of properties
+  0. `write_relationships`, describes how to write a set of relationships
   0. `includes_via`, describes how to eager include related models
-  0. `sparse_fields_via`, describes how to only return certain fields
+  0. `sparse_fields`, describes how to only return certain fields
 
-You can also provide custom adapter interfaces like below, which will use `active_record`'s `find_many_via`, `assign_relationships_via`, `update_via`, `includes_via`, and `sparse_fields_via`:
+You can also provide custom adapter interfaces like below, which will use `active_record`'s `find_many`, `write_relationships`, `update_via`, `includes_via`, and `sparse_fields`:
 
 ``` ruby
 class PhotoRealizer
@@ -170,11 +170,11 @@ class PhotoRealizer
 
   register :photos, class_name: "Photo", adapter: :active_record
 
-  adapter.find_via do |model_class, id|
+  adapter.find_one do |model_class, id|
     model_class.where { id == id or slug == id }.first
   end
 
-  adapter.assign_attributes_via do |model, attributes|
+  adapter.write_attributes do |model, attributes|
     model.update_columns(attributes)
   end
 

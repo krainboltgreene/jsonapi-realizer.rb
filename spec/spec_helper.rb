@@ -4,8 +4,21 @@ require("active_model")
 require("active_record")
 require("jsonapi-realizer")
 
-require_relative "support/memory"
-require_relative "support/example_action"
+JSONAPI::Realizer.configuration do |let|
+  let.default_identifier = :id
+end
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+
+require_relative("support/models/application_record")
+require_relative("support/models/article")
+require_relative("support/models/account")
+require_relative("support/models/comment")
+require_relative("support/models/photo")
+require_relative("support/realizers/article_realizer")
+require_relative("support/realizers/account_realizer")
+require_relative("support/realizers/comment_realizer")
+require_relative("support/realizers/photo_realizer")
 
 RSpec.configure do |let|
   # Enable flags like --only-failures and --next-failure
@@ -18,7 +31,7 @@ RSpec.configure do |let|
   # let.fail_fast = true
 
   # Only run a specific file, using the ENV variable
-  # Example: FILE=lib/jsonapi/realizer/version_spec.rb bundle exec rake spec
+  # Example => FILE=lib/jsonapi/materializer/version_spec.rb bundle exec rake spec
   let.pattern = ENV["FILE"]
 
   # Show the slowest examples in the suite
@@ -30,55 +43,11 @@ RSpec.configure do |let|
   # Output as a document string
   let.default_formatter = "doc"
 
-  let.before(:each, memory: true) do
-    Account::STORE.clear
-    Photo::STORE.clear
-    Post::STORE.clear
-    Comment::STORE.clear
+  let.before(:each) do
+    ApplicationRecord.descendants.each(&:setup!)
   end
 
-  let.after(:each, memory: true) do
-    Account::STORE.clear
-    Photo::STORE.clear
-    Post::STORE.clear
-    Comment::STORE.clear
-  end
-
-  let.before(:each, active_record: true) do
-    ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
-  end
-
-  let.before(:each, active_record: true) do
-    ActiveRecord::Migration.create_table(:items, force: true) do |table|
-      table.integer :subtotal_cents, default: 0, null: false
-      table.integer :discount_cents, default: 0, null: false
-      table.integer :cart_id, null: false
-      table.text :metadata, default: "{}"
-      table.timestamps null: false
-    end
-  end
-
-  let.before(:each, active_record: true) do
-    ActiveRecord::Migration.create_table(:carts, force: true) do |table|
-      table.integer :discount_cents, default: 0, null: false
-      table.string :state, null: false
-      table.string :status, null: false, default: :started
-      table.integer :consumer_id, null: false
-      table.text :metadata, default: "{}"
-      table.timestamps null: false
-    end
-  end
-
-  let.before(:each, active_record: true) do
-    ActiveRecord::Migration.create_table(:consumers, force: true) do |table|
-      table.string :email, default: 0, null: false
-      table.integer :credit_cents, default: 0, null: false
-      table.text :metadata, default: "{}"
-      table.timestamps null: false
-    end
-  end
-
-  let.around(:each, active_record: true) do |example|
+  let.around(:each) do |example|
     ActiveRecord::Base.transaction do
       example.run
       raise ActiveRecord::Rollback

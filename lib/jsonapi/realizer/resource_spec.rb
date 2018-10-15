@@ -1,16 +1,62 @@
 require("spec_helper")
 
 RSpec.describe(JSONAPI::Realizer::Resource) do
+  let(:resource_class) {PhotoRealizer}
+  let(:resource) {resource_class.new(intent: intent, parameters: parameters, headers: headers)}
 
-  describe ".register" do
-    subject {JSONAPI::Realizer::Resource.register(resource_class: "Test", model_class: "test", adapter: :a, type: "a")}
-    context "with something already owning that type" do
-      before do
-        JSONAPI::Realizer::Resource.register(resource_class: "Test", model_class: "test", adapter: :a, type: "a")
+  describe "#as_native" do
+    let(:subject) {resource}
+
+    context "when accepting the right type, when creating with data, with spares fields, and includes" do
+      let(:intent) {:create}
+      let(:parameters) do
+        {
+          "include" => "photographer",
+          "fields" => {
+            "articles" => "title,body,sub-text",
+            "people" => "name"
+          },
+          "data" => {
+            "type" => "photos",
+            "attributes" => {
+              "title" => "Ember Hamster",
+              "src" => "http://example.com/images/productivity.png"
+            },
+            "relationships" => {
+              "photographer" => {
+                "data" => {
+                  "type" => "people",
+                  "id" => "9"
+                }
+              }
+            }
+          }
+        }
+      end
+      let(:headers) do
+        {
+          "Accept" => "application/vnd.api+json",
+          "Content-Type" => "application/vnd.api+json"
+        }
       end
 
-      it "raises an exception" do
-        expect {subject}.to(raise_exception(JSONAPI::Realizer::Error::DuplicateRegistration))
+      before do
+        Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")
+      end
+
+      it "object is a Photo" do
+        expect(subject.object).to be_kind_of(Photo)
+      end
+
+      it "object isn't saved" do
+        expect(subject.object).to_not be_persisted()
+      end
+
+      it "object has the right attributes" do
+        expect(subject.object).to have_attributes(
+          :title => "Ember Hamster",
+          :src => "http://example.com/images/productivity.png"
+        )
       end
     end
   end

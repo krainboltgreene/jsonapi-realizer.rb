@@ -1,35 +1,37 @@
 module JSONAPI
   module Realizer
     class Adapter
-      ACTIVE_RECORD = Proc.new do
-        find_many_via do |model_class|
-          model_class.all
+      module ActiveRecord
+        def find_many(scope, conditions = {})
+          scope.where(conditions)
         end
 
-        find_via do |model_class, id|
-          model_class.find(id)
+        def find_one(scope, id)
+          scope.find(id)
         end
 
-        assign_attributes_via do |model, attributes|
+        def paginate(scope, per, offset)
+          scope.page(offset).per(per)
+        end
+
+        def write_attributes(model, attributes)
           model.assign_attributes(attributes)
         end
 
-        assign_relationships_via do |model, relationships|
+        def write_relationships(model, relationships)
           model.assign_attributes(relationships)
         end
 
-        sparse_fields do |model_class, fields|
-          model_class.select(fields)
+        def include_relationships(scope, includes)
+          scope.includes(*includes.map(&method(:arel_chain)))
         end
 
-        include_via do |model_class, includes|
-          model_class.includes(includes.map(&(recursively_nest = -> (chains) do
-            if chains.size == 1
-              chains.first
-            else
-              {chains.first => recursively_nest.call(chains.drop(1))}
-            end
-          end)))
+        private def arel_chain(chains)
+          if chains.size == 1
+            chains.first
+          else
+            {chains.first => arel_chain(chains.drop(1))}
+          end
         end
       end
     end

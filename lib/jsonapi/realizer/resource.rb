@@ -1,127 +1,253 @@
 module JSONAPI
   module Realizer
     module Resource
-      extend ActiveSupport::Concern
+      require_relative("resource/configuration")
+      require_relative("resource/attribute")
+      require_relative("resource/relation")
 
-      attr_reader :model
+      extend(ActiveSupport::Concern)
+      include(ActiveModel::Model)
 
-      def self.register(resource_class:, model_class:, adapter:, type:)
-        @mapping ||= Set.new
-        raise JSONAPI::Realizer::Error::DuplicateRegistration if @mapping.any? { |realizer| realizer.type == type }
-        @mapping << OpenStruct.new({
-          resource_class: resource_class,
-          model_class: model_class,
-          adapter: adapter,
-          type: type.dasherize,
-          attributes: OpenStruct.new({}),
-          relationships: OpenStruct.new({})
-         })
+      attr_accessor :intent
+      attr_accessor :parameters
+      attr_accessor :headers
+
+      def initialize(**keyword_arguments)
+        super(**keyword_arguments)
+
+        validate!
+
+        if include?
+          @scope = adapter.include_relationships(scope, includes)
+        end
+
+        if paginate?
+          @scope = adapter.paginate(scope, *pagination)
+        end
+
+        if writing? && data?
+          adapter.write_attributes(object, attributes)
+          adapter.write_relationships(object, relationships)
+        end
       end
 
-      def self.resource_mapping
-        @mapping.index_by(&:resource_class)
+      def to_hash
+        @native ||= {
+          :pagination => if paginate? then pagination end,
+          :selects => if selects? then selects end,
+          :includes => if include? then includes end,
+          :object => object
+        }
       end
 
-      def self.type_mapping
-        @mapping.index_by(&:type)
+      private def writing?
+        [:create, :update].include?(intent)
       end
 
-      def initialize(model)
-        @model = model
+      def paginate?
+        parameters.key?("page") && (parameters.fetch("page").key?("limit") || parameters.fetch("page").key?("offset"))
+      end
+
+      def pagination
+        [
+          parameters.fetch("page").fetch("limit", nil),
+          parameters.fetch("page").fetch("offset", nil)
+        ]
+      end
+
+      def include?
+        parameters.key?("include")
+      end
+
+      def includes
+        parameters.
+          # {"include" => "active-photographer.photographs,comments,comments.author"}
+          fetch("include").
+          # "active-photographer.photographs,comments,comments.author"
+          split(/\s*,\s*/).
+          # ["active-photographer.photographs", "comments", "comments.author"]
+          map {|chain| chain.split(".")}.
+          # [["active-photographer", "photographs"], ["comments"], ["comments", "author"]]
+          map {|list| list.map(&:underscore)}.
+          # [["active_photographer", "photographs"], ["comments"], ["comments", "author"]]
+          map do |relationship_chain|
+            # This walks down the path of relationships and normalizes thenm to
+            # their defined "as", which lets us expose AccountRealizer#name, but that actually
+            # references Account#full_name.
+            relationship_chain.reduce([[], self.class]) do |(normalized_relationship_chain, realizer_class), relationship_link|
+              [
+                [
+                  *normalized_relationship_chain,
+                  realizer_class.relation(relationship_link).as
+                ],
+                realizer_class.relation(relationship_link).realizer_class
+              ]
+            end.first
+          end
+          # [["account", "photographs"], ["comments"], ["comments", "account"]]
+      end
+
+      def selects?
+        parameters.key?("fields")
+      end
+
+      def selects
+        @selects ||= parameters.
+          # {"fields" => {"articles" => "title,body,sub-text", "people" => "name"}}
+          fetch("fields").
+          # {"articles" => "title,body,sub-text", "people" => "name"}
+          transform_keys(&:underscore).
+          # {"articles" => "title,body,sub-text", "people" => "name"}
+          transform_values {|value| value.split(/\s*,\s*/)}.
+          # {"articles" => ["title", "body", "sub-text"], "people" => ["name"]}
+          transform_values {|value| value.map(&:underscore)}
+          # {"articles" => ["title", "body", "sub_text"], "people" => ["name"]}
+      end
+
+      private def data?
+        parameters.key?("data")
+      end
+
+      private def data
+        @data ||= parameters.fetch("data")
+      end
+
+      private def type
+        return unless data.key?("type")
+
+        @type ||= data.fetch("type")
+      end
+
+      def attributes
+        return unless data.key?("attributes")
+
+        @attributes ||= data.
+          fetch("attributes").
+          transform_keys(&:underscore).
+          transform_keys{|key| attribute(key).as}
+      end
+
+      def relationships
+        return unless data.key?("relationships")
+
+        @relationships ||= data.
+          fetch("relationships").
+          transform_keys(&:underscore).
+          map(&method(:as_relationship)).to_h.
+          transform_keys{|key| relation(key).as}
+      end
+
+      private def scope
+        @scope ||= case intent
+        when :show, :update, :destroy then adapter.find_one(model_class, paramters.fetch("id"))
+        when :create, :index then adapter.find_many(model_class)
+        end
+      end
+
+      def object
+        @object ||= if intent == :create then scope.new else scope end
+      end
+
+      private def as_relationship(name, value)
+        data = value.fetch("data")
+
+        relation_configuration = relation(name).realizer_class.configuration
+
+        if data.is_a?(Array)
+          [name, relation_configuration.adapter.find_many(relation_configuration.model_class, {id: data.map {|value| value.fetch("id")}})]
+        else
+          [name, relation_configuration.adapter.find_one(relation_configuration.model_class, data.fetch("id"))]
+        end
       end
 
       private def attribute(name)
-        attributes.public_send(name.to_sym)
+        self.class.attribute(name)
       end
 
-      private def relationship(name)
-        relationships.public_send(name.to_sym)
+      private def relation(name)
+        self.class.relation(name)
       end
 
-      private def attributes
-        configuration.attributes
-      end
-
-      private def relationships
-        configuration.relationships
+      private def adapter
+        self.class.configuration.adapter
       end
 
       private def model_class
-        configuration.model_class
+        self.class.configuration.model_class
       end
 
-      private def configuration
-        self.class.configuration
+      included do
+        @attributes = {}
+        @relations = {}
+
+        validates_presence_of(:intent)
+        validates_presence_of(:parameters, :allow_empty => true)
+        validates_presence_of(:headers, :allow_empty => true)
+
+        identifier(JSONAPI::Realizer.configuration.default_identifier)
+
+        has(JSONAPI::Realizer.configuration.default_identifier)
       end
 
       class_methods do
-        def attribute(name)
-          attributes.public_send(name.to_sym)
+        def identifier(value)
+          @identifier ||= value.to_sym
         end
 
-        def relationship(name)
-          relationships.public_send(name.to_sym)
+        def type(value, class_name:, adapter:)
+          @type ||= value.to_s
+          @model_class ||= class_name.constantize
+          @adapter ||= JSONAPI::Realizer::Adapter.new(interface: adapter)
         end
 
-        def valid_attribute?(name, value)
-          attributes.respond_to?(name.to_sym)
+        def has(name, as: name, visible: false)
+          @attributes[name] ||= Attribute.new(
+            :name => name,
+            :as => as,
+            :owner => self,
+            :visible => visible
+          )
         end
 
-        def valid_relationship?(name, value)
-          relationships.respond_to?(name.to_sym)
+        def has_one(name, as: name, class_name:, visible: false)
+          @relations[name] ||= Relation.new(
+            :owner => self,
+            :type => :one,
+            :name => name,
+            :as => as,
+            :realizer_class_name => class_name,
+            :visible => visible
+          )
         end
 
-        def valid_sparse_field?(name)
-          attribute(name).selectable if attribute(name)
-        end
-
-        def valid_includes?(name)
-          relationship(name).includable if relationship(name)
-        end
-
-        def has(name, selectable: true)
-          attributes.public_send("#{name}=", OpenStruct.new({name: name, selectable: selectable}))
-        end
-
-        def has_related(name, as: name, includable: true)
-          relationships.public_send("#{name}=", OpenStruct.new({name: name, as: as, includable: includable}))
-        end
-
-        def has_one(name, as: name.to_s.pluralize.dasherize, includable: true)
-          has_related(name, as: as.to_s.dasherize, includable: includable)
-        end
-
-        def has_many(name, as: name.to_s.dasherize, includable: true)
-          has_related(name, as: as.to_s.dasherize, includable: includable)
-        end
-
-        def adapter
-          configuration.adapter
-        end
-
-        def attributes
-          configuration.attributes
-        end
-
-        def relationships
-          configuration.relationships
-        end
-
-        def model_class
-          configuration.model_class
-        end
-
-        def register(type, class_name:, adapter:)
-          JSONAPI::Realizer::Resource.register(
-            resource_class: self,
-            model_class: class_name.constantize,
-            adapter: JSONAPI::Realizer::Adapter.new(adapter),
-            type: type.to_s
+        def has_many(name, as: name, class_name:, visible: false)
+          @relations[name] ||= Relation.new(
+            :owner => self,
+            :type => :many,
+            :name => name,
+            :as => as,
+            :realizer_class_name => class_name,
+            :visible => visible
           )
         end
 
         def configuration
-          JSONAPI::Realizer::Resource.resource_mapping.fetch(self)
+          @configuration ||= Configuration.new({
+            :owner => self,
+            :type => @type,
+            :model_class => @model_class,
+            :adapter => @adapter,
+            :attributes => @attributes,
+            :relations => @relations
+          })
+        end
+
+        def attribute(name)
+          configuration.attributes.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, realizer: self)}
+        end
+
+        def relation(name)
+          configuration.relations.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, realizer: self)}
         end
       end
     end

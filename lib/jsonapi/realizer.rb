@@ -1,36 +1,36 @@
 require("ostruct")
+require("addressable")
+require("active_model")
 require("active_support/concern")
 require("active_support/core_ext/enumerable")
 require("active_support/core_ext/string")
+require("active_support/core_ext/module")
 
 module JSONAPI
   MEDIA_TYPE = "application/vnd.api+json" unless const_defined?("MEDIA_TYPE")
 
   module Realizer
-    require_relative "realizer/action"
     require_relative("realizer/version")
     require_relative("realizer/error")
+    require_relative("realizer/configuration")
+    require_relative("realizer/controller")
 
-    def self.create(payload, headers:, scope: nil)
-      enact(Action::Create.new(payload: payload, headers: headers, scope: scope))
-    end
+    @configuration ||= Configuration.new(
+      :default_invalid_content_type_exception => JSONAPI::Realizer::Error::InvalidContentTypeHeader,
+      :default_missing_content_type_exception => JSONAPI::Realizer::Error::MissingContentTypeHeader,
+      :default_identifier => :id,
+      :adapter_mappings => {}
+    )
 
-    def self.update(payload, headers:, scope: nil)
-      enact(Action::Update.new(payload: payload, headers: headers, scope: scope))
-    end
-
-    def self.show(payload, headers:, type:, scope: nil)
-      enact(Action::Show.new(payload: payload, headers: headers, type: type, scope: scope))
-    end
-
-    def self.index(payload, headers:, type:, scope: nil)
-      enact(Action::Index.new(payload: payload, headers: headers, type: type, scope: scope))
-    end
     require_relative("realizer/adapter")
     require_relative("realizer/resource")
 
-    private_class_method def self.enact(action)
-      action.tap(&:call)
+    def self.configuration
+      if block_given?
+        yield(@configuration)
+      else
+        @configuration
+      end
     end
   end
 end
