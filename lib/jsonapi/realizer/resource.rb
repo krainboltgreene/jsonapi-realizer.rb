@@ -11,6 +11,7 @@ module JSONAPI
       attr_accessor :intent
       attr_accessor :parameters
       attr_accessor :headers
+      attr_accessor :scope
 
       def initialize(**keyword_arguments)
         super(**keyword_arguments)
@@ -139,8 +140,8 @@ module JSONAPI
 
       private def scope
         @scope ||= case intent
-        when :show, :update, :destroy then adapter.find_one(model_class, paramters.fetch("id"))
-        when :create, :index then adapter.find_many(model_class)
+        when :show, :update, :destroy then adapter.find_one(@scope || model_class, paramters.fetch("id"))
+        when :create, :index then adapter.find_many(@scope || model_class)
         end
       end
 
