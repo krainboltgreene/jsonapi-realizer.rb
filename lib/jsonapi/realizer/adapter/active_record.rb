@@ -42,7 +42,7 @@ module JSONAPI
         end
 
         def include_relationships(scope, includes)
-          scope.includes(*includes.map(&method(:arel_chain)))
+          scope.eager_load(*includes.map(&method(:arel_chain)))
         end
 
         private def arel_chain(chains)
