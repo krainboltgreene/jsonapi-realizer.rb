@@ -46,7 +46,7 @@ module JSONAPI
           :selects => if selects? then selects end,
           :includes => if include? then includes end,
           :object => object
-        }
+        }.compact
       end
 
       private def writing?
