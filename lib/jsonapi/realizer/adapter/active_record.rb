@@ -2,8 +2,8 @@ module JSONAPI
   module Realizer
     class Adapter
       module ActiveRecord
-        def find_many(scope, conditions = {})
-          scope.where(conditions)
+        def find_many(scope)
+          scope.all
         end
 
         def find_one(scope, id)
