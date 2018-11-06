@@ -181,14 +181,18 @@ module JSONAPI
       end
 
       private def scope
-        @scope ||= case intent
-        when :show, :update, :destroy then adapter.find_one(@scope || model_class, paramters.fetch("id"))
-        when :create, :index then adapter.find_many(@scope || model_class)
-        end
+        @scope ||= adapter.find_many(@scope || model_class)
       end
 
       def object
-        @object ||= if intent == :create then scope.new else scope end
+        @object ||= case intent
+        when :create
+          scope.new
+        when :show, :update, :destroy
+          adapter.find_one(scope, parameters.fetch("id"))
+        else
+          scope
+        end
       end
 
       def intent
