@@ -10,6 +10,25 @@ module JSONAPI
           scope.find(id)
         end
 
+        def filtering(scope, filters)
+          scope.where(filters.slice(*scope.column_names))
+        end
+
+        def sorting(scope, sorts)
+          scope.order(
+            *sorts.
+              map do |(keychain, direction)|
+                [keychain, if direction == "-" then :DESC else :ASC end]
+              end.
+              map do |(keychain, direction)|
+                [keychain.map {|key| key.inspect}.join("."), direction]
+              end.
+              map do |pair|
+                Arel.sql(pair.join(" "))
+              end
+          )
+        end
+
         def paginate(scope, per, offset)
           scope.page(offset).per(per)
         end

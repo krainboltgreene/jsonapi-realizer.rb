@@ -18,8 +18,16 @@ module JSONAPI
 
         validate!
 
+        if filtering?
+          @scope = adapter.filtering(scope, filters)
+        end
+
         if include?
           @scope = adapter.include_relationships(scope, includes)
+        end
+
+        if sorting?
+          @scope = adapter.sorting(scope, sorts)
         end
 
         if paginate?
@@ -54,6 +62,40 @@ module JSONAPI
           parameters.fetch("page").fetch("limit", nil),
           parameters.fetch("page").fetch("offset", nil)
         ]
+      end
+
+      def sorting?
+        parameters.key?("sort")
+      end
+
+      def sorts
+        @sorts ||= parameters.
+          # {sort: "name,-age,accounts.created_at,-accounts.updated_at"}
+          fetch("sort").
+          # "name,-age,accounts.created_at,-accounts.updated_at"
+          split(",").
+          # ["name", "-age", "accounts.created_at", "-accounts.updated_at"]
+          map do |token|
+            if token.start_with?("-") then [token.sub(/^-/, "").underscore, "-"] else [token.underscore, "+"] end
+          end.
+          # [["name", "+"], ["age", "-"], ["accounts.created_at", "+"], ["accounts.updated_at", "-"]]
+          map do |(path, direction)|
+            [if path.include?(".") then path.split(".") else [self.class.configuration.type, path] end, direction]
+          end
+          # [[["accounts", "name"], "+"], [["accounts", "age"], "-"], [["accounts", "created_at"], "+"], [["accounts", "updated_at"], "-"]]
+      end
+
+      def filtering?
+        parameters.key?("filter")
+      end
+
+      def filters
+        @filters ||= parameters.
+          # {"filter" => {"full-name" => "Abby Marquardt", "email" => "amado@goldner.com"}}
+          fetch("filter").
+          # {"full-name" => "Abby Marquardt", "email" => "amado@goldner.com"}
+          transform_keys(&:underscore)
+          # {"full_name" => "Abby Marquardt", "email" => "amado@goldner.com"}
       end
 
       def include?
