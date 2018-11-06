@@ -103,7 +103,7 @@ module JSONAPI
       end
 
       def includes
-        parameters.
+        @includes ||= parameters.
           # {"include" => "active-photographer.photographs,comments,comments.author"}
           fetch("include").
           # "active-photographer.photographs,comments,comments.author"
