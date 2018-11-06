@@ -8,7 +8,7 @@ module JSONAPI
       extend(ActiveSupport::Concern)
       include(ActiveModel::Model)
 
-      attr_accessor :intent
+      attr_writer :intent
       attr_accessor :parameters
       attr_accessor :headers
       attr_accessor :scope
@@ -189,6 +189,10 @@ module JSONAPI
 
       def object
         @object ||= if intent == :create then scope.new else scope end
+      end
+
+      def intent
+        @intent.to_sym
       end
 
       private def as_relationship(name, value)
