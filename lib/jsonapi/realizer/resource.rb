@@ -201,6 +201,7 @@ module JSONAPI
       def relationships
         return unless data.key?("relationships")
 
+        binding.pry
         @relationships ||= data.
           fetch("relationships").
           transform_keys(&:underscore).
