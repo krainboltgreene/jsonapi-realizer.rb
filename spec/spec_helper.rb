@@ -31,7 +31,7 @@ RSpec.configure do |let|
   # let.fail_fast = true
 
   # Only run a specific file, using the ENV variable
-  # Example => FILE=lib/jsonapi/materializer/version_spec.rb bundle exec rake spec
+  # Example => FILE=lib/jsonapi/realizer/version_spec.rb bundle exec rake spec
   let.pattern = ENV["FILE"]
 
   # Show the slowest examples in the suite

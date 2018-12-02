@@ -6,5 +6,5 @@ class ArticleRealizer
   has_one(:author, :as => :account, :class_name => "AccountRealizer")
   has_many(:comments, :class_name => "CommentRealizer")
 
-  has(:title, :visible => true)
+  has(:title)
 end

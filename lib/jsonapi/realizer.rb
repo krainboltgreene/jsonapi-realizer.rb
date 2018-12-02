@@ -23,6 +23,7 @@ module JSONAPI
     )
 
     require_relative("realizer/adapter")
+    require_relative("realizer/context")
     require_relative("realizer/resource")
 
     def self.configuration

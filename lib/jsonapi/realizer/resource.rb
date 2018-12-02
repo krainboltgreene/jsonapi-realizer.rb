@@ -8,14 +8,42 @@ module JSONAPI
       extend(ActiveSupport::Concern)
       include(ActiveModel::Model)
 
-      attr_writer :intent
-      attr_accessor :parameters
-      attr_accessor :headers
-      attr_accessor :scope
+      MIXIN_HOOK = ->(*) do
+        @attributes = {}
+        @relations = {}
+
+        unless const_defined?("Context")
+          self::Context = Class.new do
+            include(JSONAPI::Realizer::Context)
+
+            def initialize(**keyword_arguments)
+              keyword_arguments.keys.each(&singleton_class.method(:attr_accessor))
+
+              super(**keyword_arguments)
+            end
+          end
+        end
+
+        validates_presence_of(:intent)
+        validates_presence_of(:parameters, :allow_empty => true)
+        validates_presence_of(:headers, :allow_empty => true)
+
+        identifier(JSONAPI::Realizer.configuration.default_identifier)
+
+        has(JSONAPI::Realizer.configuration.default_identifier)
+      end
+      private_constant :MIXIN_HOOK
+
+      attr_writer(:intent)
+      attr_accessor(:parameters)
+      attr_accessor(:headers)
+      attr_writer(:context)
+      attr_accessor(:scope)
 
       def initialize(**keyword_arguments)
         super(**keyword_arguments)
 
+        context.validate!
         validate!
 
         if filtering?
@@ -227,20 +255,19 @@ module JSONAPI
         self.class.configuration.model_class
       end
 
+      def context
+        self.class.const_get("Context").new(**@context || {})
+      end
+
       included do
-        @attributes = {}
-        @relations = {}
-
-        validates_presence_of(:intent)
-        validates_presence_of(:parameters, :allow_empty => true)
-        validates_presence_of(:headers, :allow_empty => true)
-
-        identifier(JSONAPI::Realizer.configuration.default_identifier)
-
-        has(JSONAPI::Realizer.configuration.default_identifier)
+        class_eval(&MIXIN_HOOK) unless @abstract_class
       end
 
       class_methods do
+        def inherited(object)
+          object.class_eval(&MIXIN_HOOK) unless object.instance_variable_defined?(:@abstract_class)
+        end
+
         def identifier(value)
           @identifier ||= value.to_sym
         end
@@ -251,35 +278,36 @@ module JSONAPI
           @adapter ||= JSONAPI::Realizer::Adapter.new(interface: adapter)
         end
 
-        def has(name, as: name, visible: false)
+        def has(name, as: name)
           @attributes[name] ||= Attribute.new(
             :name => name,
             :as => as,
-            :owner => self,
-            :visible => visible
+            :owner => self
           )
         end
 
-        def has_one(name, as: name, class_name:, visible: false)
+        def has_one(name, as: name, class_name:)
           @relations[name] ||= Relation.new(
             :owner => self,
             :type => :one,
             :name => name,
             :as => as,
-            :realizer_class_name => class_name,
-            :visible => visible
+            :realizer_class_name => class_name
           )
         end
 
-        def has_many(name, as: name, class_name:, visible: false)
+        def has_many(name, as: name, class_name:)
           @relations[name] ||= Relation.new(
             :owner => self,
             :type => :many,
             :name => name,
             :as => as,
-            :realizer_class_name => class_name,
-            :visible => visible
+            :realizer_class_name => class_name
           )
+        end
+
+        def context
+          const_get("Context")
         end
 
         def configuration

@@ -48,12 +48,12 @@ class ProfileRealizer
 end
 ```
 
-You can define special properties on attributes and relationships realizers:
+You can define aliases for these properties:
 
 ``` ruby
-has_many :doctors, as: :users, visible: false
+has_many :doctors, as: :users
 
-has :title, visible: false
+has :title, as: :name
 ```
 
 Once you've designed your resources, we just need to use them! In this example, we'll use controllers from Rails:
@@ -78,73 +78,6 @@ end
 
 Notice that we pass `realization.model` to `ProcessPhotosService`, that's because `jsonapi-realizer` doesn't do the act of saving, creating, or destroying! We just ready up the records for you to handle (including errors).
 
-### Policies
-
-Most times you will want to control what a person sees when they as for your data. We have created interfaces for this use-case and we'll show how you can use pundit (or any PORO) to constrain your in/out.
-
-First up is the policy itself:
-
-``` ruby
-class PhotoPolicy < ApplicationPolicy
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      case
-      when relation.with_role_state?(:administrator)
-        relation
-      when requester.with_onboarding_state?(:completed)
-        relation.where(photographer: requester)
-      else
-        relation.none
-      end
-    end
-
-    def sanitize(action, params)
-      case action
-      when :index
-        params.permit(:fields, :include, :filter)
-      else
-        params
-      end
-    end
-  end
-
-  def index?
-    requester.with_onboarding_state?(:completed)
-  end
-end
-```
-
-``` ruby
-class PhotoRealizer
-  include JSONAPI::Realizer::Resource
-
-  register :photos, class_name: "Photo", adapter: :active_record
-
-  has_one :photographer, as: :profiles
-
-  has :title
-  has :src
-end
-```
-
-``` ruby
-class PhotosController < ApplicationController
-  def index
-    # See: pundit for `policy_scope()`
-    realization = JSONAPI::Realizer.index(
-      policy(Photo).sanitize(:index, params),
-      headers: request.headers,
-      type: :posts,
-      scope: policy_scope(Photo)
-    )
-
-    # See: pundit for `authorize()`
-    authorize(realization.relation)
-
-    render json: JSONAPI::Serializer.serialize(realization.models, is_collection: true)
-  end
-end
-```
 
 ### Adapters
 
