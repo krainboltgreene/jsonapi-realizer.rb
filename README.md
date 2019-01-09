@@ -5,78 +5,84 @@
   - [![Version](http://img.shields.io/gem/v/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
 
 
-This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into data models for your business logic.
+This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into native data models. While designed with rails in mind, this library doesn't require rails to use.
+
 
 ## Using
 
 In order to use this library you'll want to have some models:
 
-``` ruby
-class Photo < ApplicationRecord
-  belongs_to :photographer, class_name: "Profile"
-end
 
+``` ruby
 class Profile < ApplicationRecord
   has_many :photos
 end
 ```
 
-*Note: They don't have to be ActiveRecord models, but we have built-in support for that library (adapter-based).*
+``` ruby
+class Photo < ApplicationRecord
+  belongs_to :photographer, class_name: "Profile"
+end
+```
+
+*Note: They don't have to be ActiveRecord models, but we have built-in support for that library (via an adapter).*
 
 Second you'll need some realizers:
 
 ``` ruby
-class PhotoRealizer
-  include JSONAPI::Realizer::Resource
-
-  register :photos, class_name: "Photo", adapter: :active_record
-
-  has_one :photographer, as: :profiles
-
-  has :title
-  has :src
-end
-
 class ProfileRealizer
   include JSONAPI::Realizer::Resource
 
-  register :profiles, class_name: "Profile", adapter: :active_record
+  type :profiles, class_name: "Profile", adapter: :active_record
 
-  has_many :photos
+  has_many :photos, class_name: "PhotoRealizer"
 
   has :name
 end
 ```
 
-You can define aliases for these properties:
-
 ``` ruby
-has_many :doctors, as: :users
+class PhotoRealizer
+  include JSONAPI::Realizer::Resource
 
-has :title, as: :name
+  type :photos, class_name: "Photo", adapter: :active_record
+
+  has_one :photographer, as: :profiles, class_name: "ProfileRealizer"
+
+  has :title
+  has :src
+end
 ```
 
-Once you've designed your resources, we just need to use them! In this example, we'll use controllers from Rails:
+Now that we have these we can invoke them in the controller:
 
 ``` ruby
 class PhotosController < ApplicationController
   def create
-    realization = JSONAPI::Realizer.create(params, headers: request.headers)
+    realizer = PhotoRealizer.new(
+      :intent => :create,
+      :parameters => params,
+      :headers => request.headers
+    )
 
-    ProcessPhotosService.new(realization.model)
+    realizer.object.save!
 
-    render json: JSONAPI::Serializer.serialize(realization.model)
+    render json: realizer.object.to_json
   end
 
   def index
-    realization = JSONAPI::Realizer.index(params, headers: request.headers, type: :photos)
+    realizer = PhotoRealizer.new(
+      :intent => :index,
+      :parameters => params,
+      :headers => request.headers
+    )
 
-    render json: JSONAPI::Serializer.serialize(realization.models, is_collection: true)
+    render json: realizer.object.to_json
   end
 end
 ```
 
-Notice that we pass `realization.model` to `ProcessPhotosService`, that's because `jsonapi-realizer` doesn't do the act of saving, creating, or destroying! We just ready up the records for you to handle (including errors).
+Notice that we have to handle creating the model ourselves with `realizer.object.save!`. `jsonapi-realizer` doesn't act on a request, it only prepares you to act on the request.
 
 
 ### Adapters
@@ -88,33 +94,38 @@ There are two core adapters:
 
 An adapter must provide the following interfaces:
 
-  0. `find_one`, describes how to find the model
-  0. `find_many`, describes how to find many models
-  0. `write_attributes`, describes how to write a set of properties
-  0. `write_relationships`, describes how to write a set of relationships
-  0. `includes_via`, describes how to eager include related models
-  0. `sparse_fields`, describes how to only return certain fields
+  0. `find_many(scope)`, describes how to find many records
+  0. `find_one(scope, id)`, describes how to find one record
+  0. `filtering(scope, filters)`, describes how to filter records by a set of properties
+  0. `sorting(scope, sorts)`, describes how to sort records
+  0. `paginate(scope, per, offset)`, describes how to page records
+  0. `write_attributes(model, attributes)`, describes how to write a set of properties
+  0. `write_relationships(model, relationships)`, describes how to write a set of relationships
+  0. `include_relationships(scope, includes)`, describes how to eager include related models
 
-You can also provide custom adapter interfaces like below, which will use `active_record`'s `find_many`, `write_relationships`, `update_via`, `includes_via`, and `sparse_fields`:
+You can also provide custom adapter interfaces like below:
+
+``` ruby
+JSONAPI::Realizer.configuration do |let|
+  let.adapter_mappings = {
+    active_record_postgres_pagination: PostgresActiveRecordPaginationAdapter
+  }
+end
+```
+
+``` ruby
+module PostgresActiveRecordPaginationAdapter < JSONAPI::Realizer::Adapter::ActiveRecord
+  def paginate(scope, per, offset)
+    scope.offset(offset).limit(per)
+  end
+end
+```
 
 ``` ruby
 class PhotoRealizer
   include JSONAPI::Realizer::Resource
 
-  register :photos, class_name: "Photo", adapter: :active_record
-
-  adapter.find_one do |model_class, id|
-    model_class.where { id == id or slug == id }.first
-  end
-
-  adapter.write_attributes do |model, attributes|
-    model.update_columns(attributes)
-  end
-
-  has_one :photographer, as: :profiles
-
-  has :title
-  has :src
+  type :photos, class_name: "Photo", adapter: :active_record_postgres_pagination
 end
 ```
 
