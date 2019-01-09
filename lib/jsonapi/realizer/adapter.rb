@@ -33,6 +33,8 @@ module JSONAPI
         raise(ArgumentError, "need to provide a Adapter#write_relationships interface") unless respond_to?(:write_relationships)
         raise(ArgumentError, "need to provide a Adapter#include_relationships interface") unless respond_to?(:include_relationships)
         raise(ArgumentError, "need to provide a Adapter#paginate interface") unless respond_to?(:paginate)
+        raise(ArgumentError, "need to provide a Adapter#sorting interface") unless respond_to?(:sorting)
+        raise(ArgumentError, "need to provide a Adapter#filtering interface") unless respond_to?(:filtering)
       end
     end
   end
