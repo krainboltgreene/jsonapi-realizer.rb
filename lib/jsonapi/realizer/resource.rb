@@ -322,7 +322,7 @@ module JSONAPI
         end
 
         def attribute(name)
-          configuration.attributes.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, realizer: self)}
+          configuration.attributes.fetch(name.to_sym){raise(Error::ResourceAttributeNotFound, name: name, realizer: self)}
         end
 
         def relation(name)
