@@ -62,8 +62,11 @@ module JSONAPI
           @scope = adapter.paginate(scope, *pagination)
         end
 
-        if writing? && data?
+        if writing? && data? && attributes?
           adapter.write_attributes(object, attributes)
+        end
+
+        if writing? && data? && relationships?
           adapter.write_relationships(object, relationships)
         end
       end
@@ -189,6 +192,10 @@ module JSONAPI
         @type ||= data.fetch("type")
       end
 
+      private def attributes?
+        data.key?("attributes")
+      end
+
       def attributes
         return unless data.key?("attributes")
 
@@ -196,6 +203,10 @@ module JSONAPI
           fetch("attributes").
           transform_keys(&:underscore).
           transform_keys{|key| attribute(key).as}
+      end
+
+      private def relationships?
+        data.key?("relationships")
       end
 
       def relationships
