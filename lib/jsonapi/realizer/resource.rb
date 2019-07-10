@@ -239,6 +239,8 @@ module JSONAPI
       end
 
       private def as_relationship(name, value)
+        return [name, nil] if value.nil?
+
         data = value.fetch("data")
 
         relation_configuration = relation(name).realizer_class.configuration

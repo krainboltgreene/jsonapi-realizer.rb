@@ -58,6 +58,46 @@ RSpec.describe(JSONAPI::Realizer::Resource) do
           :src => "http://example.com/images/productivity.png"
         )
       end
+
+      it "has a photographer" do
+        expect(subject.object.photographer).not_to be_nil
+      end
+    end
+
+    context "when specifying nil relationship" do
+      let(:intent) {:create}
+      let(:parameters) do
+        {
+          "data" => {
+            "type" => "photos",
+            "relationships" => {
+              "photographer" => nil
+            }
+          }
+        }
+      end
+      let(:headers) do
+        {
+          "Accept" => "application/vnd.api+json",
+          "Content-Type" => "application/vnd.api+json"
+        }
+      end
+
+      before do
+        Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")
+      end
+
+      it "object is a Photo" do
+        expect(subject.object).to be_kind_of(Photo)
+      end
+
+      it "object isn't saved" do
+        expect(subject.object).to_not be_persisted()
+      end
+
+      it "clears relationship on realizing nil" do
+        expect(subject.object.photographer).to be_nil
+      end
     end
   end
 end
