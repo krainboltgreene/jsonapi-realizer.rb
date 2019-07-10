@@ -65,10 +65,12 @@ RSpec.describe(JSONAPI::Realizer::Resource) do
     end
 
     context "when specifying nil relationship" do
-      let(:intent) {:create}
+      let(:intent) {:update}
       let(:parameters) do
         {
+          "id" => "11",
           "data" => {
+            "id" => "11",
             "type" => "photos",
             "relationships" => {
               "photographer" => nil
@@ -84,15 +86,12 @@ RSpec.describe(JSONAPI::Realizer::Resource) do
       end
 
       before do
-        Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")
+        account = Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")
+        Photo.create!(:id => 11, :photographer => account, :title => "Ember Hamster", :src => "http://example.com/images/productivity.png")
       end
 
       it "object is a Photo" do
         expect(subject.object).to be_kind_of(Photo)
-      end
-
-      it "object isn't saved" do
-        expect(subject.object).to_not be_persisted()
       end
 
       it "clears relationship on realizing nil" do
