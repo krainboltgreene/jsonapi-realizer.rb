@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JSONAPI
   module Realizer
     class Adapter
@@ -16,14 +18,14 @@ module JSONAPI
 
         def sorting(scope, sorts)
           scope.order(
-            *sorts.
-              map do |(keychain, direction)|
-                [keychain, if direction == "-" then :DESC else :ASC end]
-              end.
-              map do |(keychain, direction)|
-                [keychain.map {|key| key.inspect}.join("."), direction]
-              end.
-              map do |pair|
+            *sorts
+              .map do |(keychain, direction)|
+                [keychain, direction == "-" ? :DESC : :ASC]
+              end
+              .map do |(keychain, direction)|
+                [keychain.map(&:inspect).join("."), direction]
+              end
+              .map do |pair|
                 Arel.sql(pair.join(" "))
               end
           )
@@ -45,11 +47,13 @@ module JSONAPI
           scope.eager_load(*includes.map(&method(:arel_chain)))
         end
 
-        private def arel_chain(chains)
+        private
+
+        def arel_chain(chains)
           if chains.size == 1
             chains.first
           else
-            {chains.first => arel_chain(chains.drop(1))}
+            { chains.first => arel_chain(chains.drop(1)) }
           end
         end
       end

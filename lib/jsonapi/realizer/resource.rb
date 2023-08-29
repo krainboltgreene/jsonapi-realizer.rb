@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JSONAPI
   module Realizer
     module Resource
@@ -8,11 +10,11 @@ module JSONAPI
       extend(ActiveSupport::Concern)
       include(ActiveModel::Model)
 
-      MIXIN_HOOK = ->(*) do
+      MIXIN_HOOK = lambda do |*|
         @attributes = {}
         @relations = {}
 
-        unless const_defined?("Context")
+        unless const_defined?(:Context)
           self::Context = Class.new do
             include(JSONAPI::Realizer::Context)
 
@@ -25,8 +27,8 @@ module JSONAPI
         end
 
         validates_presence_of(:intent)
-        validates_presence_of(:parameters, :allow_empty => true)
-        validates_presence_of(:headers, :allow_empty => true)
+        validates_presence_of(:parameters, allow_empty: true)
+        validates_presence_of(:headers, allow_empty: true)
 
         identifier(JSONAPI::Realizer.configuration.default_identifier)
 
@@ -38,7 +40,7 @@ module JSONAPI
       attr_accessor(:parameters)
       attr_accessor(:headers)
       attr_writer(:context)
-      attr_accessor(:scope)
+      attr_writer(:scope)
 
       def initialize(**keyword_arguments)
         super(**keyword_arguments)
@@ -46,42 +48,28 @@ module JSONAPI
         context.validate!
         validate!
 
-        if filtering?
-          @scope = adapter.filtering(scope, filters)
-        end
+        @scope = adapter.filtering(scope, filters) if filtering?
 
-        if include?
-          @scope = adapter.include_relationships(scope, includes)
-        end
+        @scope = adapter.include_relationships(scope, includes) if include?
 
-        if sorting?
-          @scope = adapter.sorting(scope, sorts)
-        end
+        @scope = adapter.sorting(scope, sorts) if sorting?
 
-        if paginate?
-          @scope = adapter.paginate(scope, *pagination)
-        end
+        @scope = adapter.paginate(scope, *pagination) if paginate?
 
-        if writing? && data? && attributes?
-          adapter.write_attributes(object, attributes)
-        end
+        adapter.write_attributes(object, attributes) if writing? && data? && attributes?
 
-        if writing? && data? && relationships?
-          adapter.write_relationships(object, relationships)
-        end
+        return unless writing? && data? && relationships?
+
+        adapter.write_relationships(object, relationships)
       end
 
       def to_hash
-        @native ||= {
-          :pagination => if paginate? then pagination end,
-          :selects => if selects? then selects end,
-          :includes => if include? then includes end,
-          :object => object
+        @to_hash ||= {
+          pagination: (pagination if paginate?),
+          selects: (selects if selects?),
+          includes: (includes if include?),
+          object:
         }.compact
-      end
-
-      private def writing?
-        [:create, :update].include?(intent)
       end
 
       def paginate?
@@ -101,19 +89,19 @@ module JSONAPI
 
       def sorts
         @sorts ||= parameters.
-          # {sort: "name,-age,accounts.created_at,-accounts.updated_at"}
-          fetch("sort").
-          # "name,-age,accounts.created_at,-accounts.updated_at"
-          split(",").
-          # ["name", "-age", "accounts.created_at", "-accounts.updated_at"]
-          map do |token|
-            if token.start_with?("-") then [token.sub(/^-/, "").underscore, "-"] else [token.underscore, "+"] end
-          end.
-          # [["name", "+"], ["age", "-"], ["accounts.created_at", "+"], ["accounts.updated_at", "-"]]
-          map do |(path, direction)|
-            [if path.include?(".") then path.split(".") else [self.class.configuration.type, path] end, direction]
-          end
-          # [[["accounts", "name"], "+"], [["accounts", "age"], "-"], [["accounts", "created_at"], "+"], [["accounts", "updated_at"], "-"]]
+                   # {sort: "name,-age,accounts.created_at,-accounts.updated_at"}
+                   fetch("sort").
+                   # "name,-age,accounts.created_at,-accounts.updated_at"
+                   split(",").
+                   # ["name", "-age", "accounts.created_at", "-accounts.updated_at"]
+                   map do |token|
+                     token.start_with?("-") ? [token.sub(/^-/, "").underscore, "-"] : [token.underscore, "+"]
+                   end.
+                   # [["name", "+"], ["age", "-"], ["accounts.created_at", "+"], ["accounts.updated_at", "-"]]
+                   map do |(path, direction)|
+          [path.include?(".") ? path.split(".") : [self.class.configuration.type, path], direction]
+        end
+        # [[["accounts", "name"], "+"], [["accounts", "age"], "-"], [["accounts", "created_at"], "+"], [["accounts", "updated_at"], "-"]]
       end
 
       def filtering?
@@ -122,11 +110,11 @@ module JSONAPI
 
       def filters
         @filters ||= parameters.
-          # {"filter" => {"full-name" => "Abby Marquardt", "email" => "amado@goldner.com"}}
-          fetch("filter").
-          # {"full-name" => "Abby Marquardt", "email" => "amado@goldner.com"}
-          transform_keys(&:underscore)
-          # {"full_name" => "Abby Marquardt", "email" => "amado@goldner.com"}
+                     # {"filter" => {"full-name" => "Abby Marquardt", "email" => "amado@goldner.com"}}
+                     fetch("filter").
+                     # {"full-name" => "Abby Marquardt", "email" => "amado@goldner.com"}
+                     transform_keys(&:underscore)
+        # {"full_name" => "Abby Marquardt", "email" => "amado@goldner.com"}
       end
 
       def include?
@@ -135,30 +123,30 @@ module JSONAPI
 
       def includes
         @includes ||= parameters.
-          # {"include" => "active-photographer.photographs,comments,comments.author"}
-          fetch("include").
-          # "active-photographer.photographs,comments,comments.author"
-          split(/\s*,\s*/).
-          # ["active-photographer.photographs", "comments", "comments.author"]
-          map {|chain| chain.split(".")}.
-          # [["active-photographer", "photographs"], ["comments"], ["comments", "author"]]
-          map {|list| list.map(&:underscore)}.
-          # [["active_photographer", "photographs"], ["comments"], ["comments", "author"]]
-          map do |relationship_chain|
-            # This walks down the path of relationships and normalizes thenm to
-            # their defined "as", which lets us expose AccountRealizer#name, but that actually
-            # references Account#full_name.
-            relationship_chain.reduce([[], self.class]) do |(normalized_relationship_chain, realizer_class), relationship_link|
+                      # {"include" => "active-photographer.photographs,comments,comments.author"}
+                      fetch("include").
+                      # "active-photographer.photographs,comments,comments.author"
+                      split(/\s*,\s*/).
+                      # ["active-photographer.photographs", "comments", "comments.author"]
+                      map { |chain| chain.split(".") }.
+                      # [["active-photographer", "photographs"], ["comments"], ["comments", "author"]]
+                      map { |list| list.map(&:underscore) }.
+                      # [["active_photographer", "photographs"], ["comments"], ["comments", "author"]]
+                      map do |relationship_chain|
+          # This walks down the path of relationships and normalizes thenm to
+          # their defined "as", which lets us expose AccountRealizer#name, but that actually
+          # references Account#full_name.
+          relationship_chain.reduce([[], self.class]) do |(normalized_relationship_chain, realizer_class), relationship_link|
+            [
               [
-                [
-                  *normalized_relationship_chain,
-                  realizer_class.relation(relationship_link).as
-                ],
-                realizer_class.relation(relationship_link).realizer_class
-              ]
-            end.first
-          end
-          # [["account", "photographs"], ["comments"], ["comments", "account"]]
+                *normalized_relationship_chain,
+                realizer_class.relation(relationship_link).as
+              ],
+              realizer_class.relation(relationship_link).realizer_class
+            ]
+          end.first
+        end
+        # [["account", "photographs"], ["comments"], ["comments", "account"]]
       end
 
       def selects?
@@ -167,109 +155,53 @@ module JSONAPI
 
       def selects
         @selects ||= parameters.
-          # {"fields" => {"articles" => "title,body,sub-text", "people" => "name"}}
-          fetch("fields").
-          # {"articles" => "title,body,sub-text", "people" => "name"}
-          transform_keys(&:underscore).
-          # {"articles" => "title,body,sub-text", "people" => "name"}
-          transform_values {|value| value.split(/\s*,\s*/)}.
-          # {"articles" => ["title", "body", "sub-text"], "people" => ["name"]}
-          transform_values {|value| value.map(&:underscore)}
-          # {"articles" => ["title", "body", "sub_text"], "people" => ["name"]}
-      end
-
-      private def data?
-        parameters.key?("data")
-      end
-
-      private def data
-        @data ||= parameters.fetch("data")
-      end
-
-      private def type
-        return unless data.key?("type")
-
-        @type ||= data.fetch("type")
-      end
-
-      private def attributes?
-        data.key?("attributes")
+                     # {"fields" => {"articles" => "title,body,sub-text", "people" => "name"}}
+                     fetch("fields").
+                     # {"articles" => "title,body,sub-text", "people" => "name"}
+                     transform_keys(&:underscore).
+                     # {"articles" => "title,body,sub-text", "people" => "name"}
+                     transform_values { |value| value.split(/\s*,\s*/) }.
+                     # {"articles" => ["title", "body", "sub-text"], "people" => ["name"]}
+                     transform_values { |value| value.map(&:underscore) }
+        # {"articles" => ["title", "body", "sub_text"], "people" => ["name"]}
       end
 
       def attributes
         return unless data.key?("attributes")
 
-        @attributes ||= data.
-          fetch("attributes").
-          transform_keys(&:underscore).
-          transform_keys{|key| attribute(key).as}
-      end
-
-      private def relationships?
-        data.key?("relationships")
+        @attributes ||= data
+                        .fetch("attributes")
+                        .transform_keys(&:underscore)
+                        .transform_keys { |key| attribute(key).as }
       end
 
       def relationships
         return unless data.key?("relationships")
 
-        @relationships ||= data.
-          fetch("relationships").
-          transform_keys(&:underscore).
-          map(&method(:as_relationship)).to_h.
-          transform_keys{|key| relation(key).as}
-      end
-
-      private def scope
-        @scope ||= adapter.find_many(@scope || model_class)
+        @relationships ||= data
+                           .fetch("relationships")
+                           .transform_keys(&:underscore)
+                           .map(&method(:as_relationship)).to_h
+                           .transform_keys { |key| relation(key).as }
       end
 
       def object
         @object ||= case intent
-        when :create
-          scope.new
-        when :show, :update, :destroy
-          adapter.find_one(scope, parameters.fetch("id"))
-        else
-          scope
-        end
+                    when :create
+                      scope.new
+                    when :show, :update, :destroy
+                      adapter.find_one(scope, parameters.fetch("id"))
+                    else
+                      scope
+                    end
       end
 
       def intent
         @intent.to_sym
       end
 
-      private def as_relationship(name, value)
-        return [name, nil] if value.nil?
-
-        data = value.fetch("data")
-
-        relation_configuration = relation(name).realizer_class.configuration
-
-        if data.is_a?(Array)
-          [name, relation_configuration.adapter.find_many(relation_configuration.model_class, {id: data.map {|value| value.fetch("id")}})]
-        else
-          [name, relation_configuration.adapter.find_one(relation_configuration.model_class, data.fetch("id"))]
-        end
-      end
-
-      private def attribute(name)
-        self.class.attribute(name)
-      end
-
-      private def relation(name)
-        self.class.relation(name)
-      end
-
-      private def adapter
-        self.class.configuration.adapter
-      end
-
-      private def model_class
-        self.class.configuration.model_class
-      end
-
       def context
-        self.class.const_get("Context").new(**@context || {})
+        self.class.const_get(:Context).new(**@context || {})
       end
 
       included do
@@ -278,6 +210,7 @@ module JSONAPI
 
       class_methods do
         def inherited(object)
+          super
           object.class_eval(&MIXIN_HOOK) unless object.instance_variable_defined?(:@abstract_class)
         end
 
@@ -288,59 +221,125 @@ module JSONAPI
         def type(value, class_name:, adapter:)
           @type ||= value.to_s
           @model_class ||= class_name.constantize
-          @adapter ||= JSONAPI::Realizer::Adapter.new(interface: adapter)
+          @type ||= JSONAPI::Realizer::Adapter.new(interface: adapter)
         end
 
         def has(name, as: name)
           @attributes[name] ||= Attribute.new(
-            :name => name,
-            :as => as,
-            :owner => self
+            name:,
+            as:,
+            owner: self
           )
         end
 
-        def has_one(name, as: name, class_name:)
+        # rubocop:disable Naming/PredicateName
+        def has_one(name, class_name:, as: name)
           @relations[name] ||= Relation.new(
-            :owner => self,
-            :type => :one,
-            :name => name,
-            :as => as,
-            :realizer_class_name => class_name
+            owner: self,
+            type: :one,
+            name:,
+            as:,
+            realizer_class_name: class_name
           )
         end
+        # rubocop:enable Naming/PredicateName
 
-        def has_many(name, as: name, class_name:)
+        # rubocop:disable Naming/PredicateName
+        def has_many(name, class_name:, as: name)
           @relations[name] ||= Relation.new(
-            :owner => self,
-            :type => :many,
-            :name => name,
-            :as => as,
-            :realizer_class_name => class_name
+            owner: self,
+            type: :many,
+            name:,
+            as:,
+            realizer_class_name: class_name
           )
         end
+        # rubocop:enable Naming/PredicateName
 
         def context
-          const_get("Context")
+          const_get(:Context)
         end
 
         def configuration
           @configuration ||= Configuration.new({
-            :owner => self,
-            :type => @type,
-            :model_class => @model_class,
-            :adapter => @adapter,
-            :attributes => @attributes,
-            :relations => @relations
-          })
+                                                 owner: self,
+                                                 type: @type,
+                                                 model_class: @model_class,
+                                                 adapter: @adapter,
+                                                 attributes: @attributes,
+                                                 relations: @relations
+                                               })
         end
 
         def attribute(name)
-          configuration.attributes.fetch(name.to_sym){raise(Error::ResourceAttributeNotFound, name: name, realizer: self)}
+          configuration.attributes.fetch(name.to_sym) { raise(Error::ResourceAttributeNotFound, name:, realizer: self) }
         end
 
         def relation(name)
-          configuration.relations.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, realizer: self)}
+          configuration.relations.fetch(name.to_sym) { raise(Error::ResourceRelationshipNotFound, name:, realizer: self) }
         end
+      end
+
+      private
+
+      def writing?
+        %i[create update].include?(intent)
+      end
+
+      def data?
+        parameters.key?("data")
+      end
+
+      def data
+        @data ||= parameters.fetch("data")
+      end
+
+      def type
+        return unless data.key?("type")
+
+        @type ||= data.fetch("type")
+      end
+
+      def attributes?
+        data.key?("attributes")
+      end
+
+      def relationships?
+        data.key?("relationships")
+      end
+
+      def scope
+        @scope ||= adapter.find_many(@scope || model_class)
+      end
+
+      def as_relationship(name, value)
+        return [name, nil] if value.nil?
+
+        data = value.fetch("data")
+
+        relation_configuration = relation(name).realizer_class.configuration
+
+        if data.is_a?(Array)
+          [name, relation_configuration.adapter.find_many(relation_configuration.model_class, { id: data.map { |value| value.fetch("id") } })]
+        else
+          [name, relation_configuration.adapter.find_one(relation_configuration.model_class, data.fetch("id"))]
+        end
+      end
+
+      def attribute(name)
+        self.class.attribute(name)
+      end
+
+      def relation(name)
+        self.class.relation(name)
+      end
+
+      def adapter
+        self.class.configuration.adapter
+      end
+
+      def model_class
+        self.class.configuration.model_class
       end
     end
   end

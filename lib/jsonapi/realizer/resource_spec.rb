@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 require("spec_helper")
 
 RSpec.describe(JSONAPI::Realizer::Resource) do
-  let(:resource_class) {PhotoRealizer}
-  let(:resource) {resource_class.new(intent: intent, parameters: parameters, headers: headers)}
+  let(:resource_class) { PhotoRealizer }
+  let(:resource) { resource_class.new(intent:, parameters:, headers:) }
 
   describe "#as_native" do
-    let(:subject) {resource}
+    subject { resource }
 
     context "when accepting the right type, when creating with data, with spares fields, and includes" do
-      let(:intent) {:create}
+      let(:intent) { :create }
       let(:parameters) do
         {
           "include" => "photographer",
@@ -41,21 +43,21 @@ RSpec.describe(JSONAPI::Realizer::Resource) do
       end
 
       before do
-        Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")
+        Account.create!(id: 9, name: "Dan Gebhardt", twitter: "dgeb")
       end
 
       it "object is a Photo" do
-        expect(subject.object).to be_kind_of(Photo)
+        expect(subject.object).to be_a(Photo)
       end
 
       it "object isn't saved" do
-        expect(subject.object).to_not be_persisted()
+        expect(subject.object).not_to be_persisted
       end
 
       it "object has the right attributes" do
         expect(subject.object).to have_attributes(
-          :title => "Ember Hamster",
-          :src => "http://example.com/images/productivity.png"
+          title: "Ember Hamster",
+          src: "http://example.com/images/productivity.png"
         )
       end
 
@@ -65,7 +67,7 @@ RSpec.describe(JSONAPI::Realizer::Resource) do
     end
 
     context "when specifying nil relationship" do
-      let(:intent) {:update}
+      let(:intent) { :update }
       let(:parameters) do
         {
           "id" => "11",
@@ -86,12 +88,12 @@ RSpec.describe(JSONAPI::Realizer::Resource) do
       end
 
       before do
-        account = Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")
-        Photo.create!(:id => 11, :photographer => account, :title => "Ember Hamster", :src => "http://example.com/images/productivity.png")
+        account = Account.create!(id: 9, name: "Dan Gebhardt", twitter: "dgeb")
+        Photo.create!(id: 11, photographer: account, title: "Ember Hamster", src: "http://example.com/images/productivity.png")
       end
 
       it "object is a Photo" do
-        expect(subject.object).to be_kind_of(Photo)
+        expect(subject.object).to be_a(Photo)
       end
 
       it "clears relationship on realizing nil" do

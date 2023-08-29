@@ -1,11 +1,6 @@
 # jsonapi-realizer
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-realizer.rb.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-realizer.rb)
-  - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
-  - [![Version](http://img.shields.io/gem/v/jsonapi-realizer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-realizer)
-
-
-This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into native data models. While designed with rails in mind, this library doesn't require rails to use.
+This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into native data models. While designed with rails in mind, this library doesn't require rails to use. I'm already using jsonapi-realizer and it's sister project jsonapi-materializer in a gem of that allows http json services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 
 ## Using
@@ -245,11 +240,6 @@ module V1
 end
 ```
 
-### jsonapi-home
-
-I'm already using jsonapi-realizer and it's sister project jsonapi-serializers in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
-
-
 ## Installing
 
 Add this line to your application's Gemfile:
@@ -263,7 +253,7 @@ Or install it yourself with:
 
 ## Contributing
 
-  1. Read the [Code of Conduct](/CONDUCT.md)
+  1. Read the [Code of Conduct](/CONDUCT)
   2. Fork it
   3. Create your feature branch (`git checkout -b my-new-feature`)
   4. Commit your changes (`git commit -am 'Add some feature'`)
