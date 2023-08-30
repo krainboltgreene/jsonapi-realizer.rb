@@ -219,9 +219,9 @@ module JSONAPI
         end
 
         def type(value, class_name:, adapter:)
-          @type ||= value.to_s
-          @model_class ||= class_name.constantize
-          @type ||= JSONAPI::Realizer::Adapter.new(interface: adapter)
+          @type = value.to_s
+          @model_class = class_name.constantize
+          @adapter = JSONAPI::Realizer::Adapter.new(interface: adapter)
         end
 
         def has(name, as: name)
@@ -261,14 +261,14 @@ module JSONAPI
         end
 
         def configuration
-          @configuration ||= Configuration.new({
-                                                 owner: self,
-                                                 type: @type,
-                                                 model_class: @model_class,
-                                                 adapter: @adapter,
-                                                 attributes: @attributes,
-                                                 relations: @relations
-                                               })
+          @configuration ||= Configuration.new(
+            owner: self,
+            type: @type,
+            model_class: @model_class,
+            adapter: @adapter,
+            attributes: @attributes,
+            relations: @relations
+          )
         end
 
         def attribute(name)
@@ -280,39 +280,37 @@ module JSONAPI
         end
       end
 
-      private
-
-      def writing?
+      private def writing?
         %i[create update].include?(intent)
       end
 
-      def data?
+      private def data?
         parameters.key?("data")
       end
 
-      def data
+      private def data
         @data ||= parameters.fetch("data")
       end
 
-      def type
+      private def type
         return unless data.key?("type")
 
         @type ||= data.fetch("type")
       end
 
-      def attributes?
+      private def attributes?
         data.key?("attributes")
       end
 
-      def relationships?
+      private def relationships?
         data.key?("relationships")
       end
 
-      def scope
+      private def scope
         @scope ||= adapter.find_many(@scope || model_class)
       end
 
-      def as_relationship(name, value)
+      private def as_relationship(name, value)
         return [name, nil] if value.nil?
 
         data = value.fetch("data")
@@ -326,19 +324,19 @@ module JSONAPI
         end
       end
 
-      def attribute(name)
+      private def attribute(name)
         self.class.attribute(name)
       end
 
-      def relation(name)
+      private def relation(name)
         self.class.relation(name)
       end
 
-      def adapter
+      private def adapter
         self.class.configuration.adapter
       end
 
-      def model_class
+      private def model_class
         self.class.configuration.model_class
       end
     end

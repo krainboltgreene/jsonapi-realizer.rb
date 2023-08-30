@@ -85,21 +85,19 @@ module JSONAPI
         # [["title"], ["active_photographer", "email"]]
       end
 
-      private
-
-      def model_class
+      private def model_class
         resource_class&.model_class
       end
 
-      def resource_class
+      private def resource_class
         configuration&.resource_class
       end
 
-      def adapter
+      private def adapter
         configuration&.adapter
       end
 
-      def relation_after_inclusion(subrelation)
+      private def relation_after_inclusion(subrelation)
         if includes.any?
           resource_class.include_via_call(subrelation, includes)
         else
@@ -107,7 +105,7 @@ module JSONAPI
         end
       end
 
-      def relation_after_fields(subrelation)
+      private def relation_after_fields(subrelation)
         if fields.any?
           resource_class.sparse_fields_call(subrelation, fields)
         else
@@ -115,15 +113,15 @@ module JSONAPI
         end
       end
 
-      def data
+      private def data
         payload.fetch("data", nil)
       end
 
-      def type
+      private def type
         (@type || data["type"]).to_s.dasherize if @type || data
       end
 
-      def attributes
+      private def attributes
         return unless data
 
         data
@@ -132,7 +130,7 @@ module JSONAPI
           .select(&resource_class.method(:valid_attribute?))
       end
 
-      def relationships
+      private def relationships
         return unless data
 
         data
@@ -142,7 +140,7 @@ module JSONAPI
           .transform_values(&method(:as_relationship))
       end
 
-      def as_relationship(value)
+      private def as_relationship(value)
         if value.is_a?(Array)
           value.map do |member|
             data = member.fetch("data")
@@ -162,7 +160,7 @@ module JSONAPI
         end
       end
 
-      def configuration
+      private def configuration
         JSONAPI::Realizer::Resource.type_mapping.fetch(type) if type
       end
     end

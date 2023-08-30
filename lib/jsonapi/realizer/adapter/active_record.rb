@@ -47,9 +47,7 @@ module JSONAPI
           scope.eager_load(*includes.map(&method(:arel_chain)))
         end
 
-        private
-
-        def arel_chain(chains)
+        private def arel_chain(chains)
           if chains.size == 1
             chains.first
           else

@@ -42,3 +42,5 @@ Metrics/CyclomaticComplexity:
   Enabled: false
 Performance/MethodObjectAsBlock:
   Enabled: false
+Style/AccessModifierDeclarations:
+  EnforcedStyle: inline
