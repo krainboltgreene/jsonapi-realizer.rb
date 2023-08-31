@@ -28,7 +28,5 @@ jobs:
           bundler-cache: true
       - name: Rubocop check
         run: bundle exec rubocop --cache true --display-only-fail-level-offenses --extra-details lib/
-      - name: Source security auditing
-        run: bundle exec brakeman --no-exit-on-warn
       - name: Run tests
         run: bundle exec rspec --backtrace --profile 10 lib/**/*_spec.rb

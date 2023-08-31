@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email = ["kurtis@rainbolt-greene.online"]
   spec.summary = "A way to take json:api requests and turn them into models"
   spec.description = spec.summary
-  spec.homepage = "http://krainboltgreene.github.io/jsonapi-realizer.rb"
+  spec.homepage = "https://github.com/krainboltgreene/jsonapi-realizer.rb"
   spec.license = "HL3"
   spec.required_ruby_version = "~> 3.2"
 
