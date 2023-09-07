@@ -66,7 +66,7 @@ class PhotosController < ApplicationController
   end
 
   def index
-    realizer = PhotoRealizer.new(
+    realizer = PhotoRealizer.new
       :intent => :index,
       :parameters => params,
       :headers => request.headers
@@ -213,26 +213,27 @@ You can see this resource controller used below:
 module V1
   class AccountsController < ::V1::ApplicationController
     def index
-      realization = JSONAPI::Realizer.index(
-        policy(Account).sanitize(:index, params),
-        headers: request.headers,
-        scope: policy_scope(Account),
-        type: :accounts
+      realization = PhotoRealizer.new(
+        :intent => :index,
+        :scope => policy_scope(Account),
+        :parameters => policy(Account).sanitize(:index, params),
+        :headers => request.headers
       )
 
-      authorize realization.relation
+      authorize realization.object
 
       render json: serialize(realization)
     end
 
     def create
-      realization = JSONAPI::Realizer.create(
-        policy(Account).sanitize(:create, params),
-        headers: request.headers,
-        scope: policy_scope(Account)
+      realization = PhotoRealizer.new(
+        :intent => :create,
+        :scope => policy_scope(Account),
+        :parameters => policy(Account).sanitize(:create, params),
+        :headers => request.headers
       )
 
-      authorize realization.relation
+      authorize realization.object
 
       render json: serialize(realization)
     end
