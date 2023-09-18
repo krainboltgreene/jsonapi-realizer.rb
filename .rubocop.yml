@@ -2,7 +2,6 @@
 require:
 - rubocop-rspec
 - rubocop-performance
-- rubocop-rails
 - rubocop-rake
 AllCops:
   NewCops: enable
@@ -45,4 +44,6 @@ Performance/MethodObjectAsBlock:
 Style/AccessModifierDeclarations:
   EnforcedStyle: inline
 RSpec/MultipleExpectations:
+  Enabled: false
+Naming/RescuedExceptionsVariableName:
   Enabled: false
