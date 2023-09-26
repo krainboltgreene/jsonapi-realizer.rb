@@ -18,6 +18,8 @@ module JSONAPI
     require_relative("realizer/controller")
 
     @configuration ||= Configuration.new(
+      default_invalid_accept_type_exception: JSONAPI::Realizer::Error::InvalidAcceptTypeHeader,
+      default_missing_accept_type_exception: JSONAPI::Realizer::Error::MissingAcceptTypeHeader,
       default_invalid_content_type_exception: JSONAPI::Realizer::Error::InvalidContentTypeHeader,
       default_missing_content_type_exception: JSONAPI::Realizer::Error::MissingContentTypeHeader,
       default_identifier: :id,
