@@ -3,11 +3,12 @@
 module JSONAPI
   module Realizer
     class Error
-      class InvalidDataTypeProperty < Error
+      class InvalidAcceptTypeHeader < Error
         attr_accessor(:given)
+        attr_accessor(:wanted)
 
         def message
-          "root.data property was #{given}, which is not an Hash, Array, or nil"
+          "HTTP Accept Header recieved is #{given}, but expected #{wanted}"
         end
       end
     end

@@ -3,7 +3,7 @@
 module JSONAPI
   module Realizer
     class Error
-      class MissingDataTypeProperty < Error
+      class MissingAcceptTypeHeader < Error
       end
     end
   end
