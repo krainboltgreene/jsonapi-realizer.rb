@@ -15,7 +15,7 @@ module JSONAPI
 
         return if request.headers.fetch("HTTP_ACCEPT").include?(JSONAPI::MEDIA_TYPE)
 
-        raise(JSONAPI::Realizer.configuration.default_invalid_accept_type_exception)
+        raise(JSONAPI::Realizer.configuration.default_invalid_accept_type_exception, given: request.headers.fetch("HTTP_ACCEPT"), wanted: JSONAPI::MEDIA_TYPE, key: "Accept")
       end
 
       private def reject_missing_content_type_header
@@ -30,7 +30,7 @@ module JSONAPI
 
         return if request.headers.fetch("Content-Type").include?(JSONAPI::MEDIA_TYPE)
 
-        raise(JSONAPI::Realizer.configuration.default_invalid_content_type_exception)
+        raise(JSONAPI::Realizer.configuration.default_invalid_content_type_exception, given: request.headers.fetch("Content-Type"), wanted: JSONAPI::MEDIA_TYPE, key: "Content-Type")
       end
     end
   end
