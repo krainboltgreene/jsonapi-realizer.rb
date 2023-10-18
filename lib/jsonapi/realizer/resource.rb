@@ -167,15 +167,17 @@ module JSONAPI
       end
 
       def attributes
+        return {} unless data["attributes"].kind_of?(Hash)
         @attributes ||= data
-                        .fetch("attributes", {})
+                        .fetch("attributes")
                         .transform_keys(&:underscore)
                         .transform_keys { |key| attribute(key).as }
       end
 
       def relationships
+        return {} unless data["relationships"].kind_of?(Hash)
         @relationships ||= data
-                           .fetch("relationships", {})
+                           .fetch("relationships")
                            .transform_keys(&:underscore)
                            .map(&method(:as_relationship)).to_h
                            .transform_keys { |key| relation(key).as }

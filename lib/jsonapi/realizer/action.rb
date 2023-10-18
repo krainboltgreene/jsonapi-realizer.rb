@@ -123,18 +123,20 @@ module JSONAPI
 
       private def attributes
         return unless data
+        return {} unless data["attributes"].kind_of?(Hash)
 
         data
-          .fetch("attributes", {})
+          .fetch("attributes")
           .transform_keys(&:underscore)
           .select(&resource_class.method(:valid_attribute?))
       end
 
       private def relationships
         return unless data
+        return {} unless data["relationships"].kind_of?(Hash)
 
         data
-          .fetch("relationships", {})
+          .fetch("relationships")
           .transform_keys(&:underscore)
           .select(&resource_class.method(:valid_relationship?))
           .transform_values(&method(:as_relationship))
