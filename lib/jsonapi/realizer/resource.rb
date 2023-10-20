@@ -73,7 +73,15 @@ module JSONAPI
       end
 
       def paginate?
-        parameters.key?("page") && (parameters.fetch("page").key?("limit") || parameters.fetch("page").key?("offset"))
+        parameters.key?("page") && parameters.fetch("page").respond_to?(:fetch) && (paginate_limit? || paginate_offset?)
+      end
+
+      private def paginate_limit?
+        parameters.fetch("page").key?("limit")
+      end
+
+      private def paginate_offset?
+        parameters.fetch("page").key?("offset")
       end
 
       def pagination
@@ -84,7 +92,7 @@ module JSONAPI
       end
 
       def sorting?
-        parameters.key?("sort")
+        parameters.key?("sort") && parameters.fetch("sort").respond_to?(:split)
       end
 
       def sorts
@@ -105,7 +113,7 @@ module JSONAPI
       end
 
       def filtering?
-        parameters.key?("filter")
+        parameters.key?("filter") && parameters.fetch("filter").respond_to?(:transform_keys)
       end
 
       def filters
@@ -118,7 +126,7 @@ module JSONAPI
       end
 
       def include?
-        parameters.key?("include")
+        parameters.key?("include") && parameters.fetch("include").respond_to?(:split)
       end
 
       def includes
@@ -150,7 +158,7 @@ module JSONAPI
       end
 
       def selects?
-        parameters.key?("fields")
+        parameters.key?("fields") && parameters.fetch("fields").respond_to?(:transform_keys)
       end
 
       def selects
@@ -167,7 +175,6 @@ module JSONAPI
       end
 
       def attributes
-        return {} unless data["attributes"].kind_of?(Hash)
         @attributes ||= data
                         .fetch("attributes")
                         .transform_keys(&:underscore)
@@ -175,7 +182,6 @@ module JSONAPI
       end
 
       def relationships
-        return {} unless data["relationships"].kind_of?(Hash)
         @relationships ||= data
                            .fetch("relationships")
                            .transform_keys(&:underscore)
@@ -283,7 +289,7 @@ module JSONAPI
       end
 
       private def data?
-        parameters.key?("data")
+        parameters.key?("data") && (parameters.fetch("data").respond_to?(:fetch) || parameters.fetch("data").respond_to?(:map))
       end
 
       private def data
@@ -297,11 +303,11 @@ module JSONAPI
       end
 
       private def attributes?
-        data.key?("attributes")
+        data.key?("attributes") && data.fetch("attributes").respond_to?(:fetch)
       end
 
       private def relationships?
-        data.key?("relationships")
+        data.key?("relationships") && data.fetch("relationships").respond_to?(:fetch)
       end
 
       private def scope
@@ -315,7 +321,7 @@ module JSONAPI
 
         relation_configuration = relation(name).realizer_class.configuration
 
-        if data.is_a?(Array)
+        if data.kind_of?(Array)
           [name, relation_configuration.adapter.find_many(relation_configuration.model_class, { id: data.map { |value| value.fetch("id") } })]
         else
           [name, relation_configuration.adapter.find_one(relation_configuration.model_class, data.fetch("id"))]
