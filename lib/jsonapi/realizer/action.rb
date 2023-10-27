@@ -123,7 +123,7 @@ module JSONAPI
 
       private def attributes
         return unless data
-        return {} unless data["attributes"].kind_of?(Hash)
+        return {} unless data["attributes"].is_a?(Hash)
 
         data
           .fetch("attributes")
@@ -133,7 +133,7 @@ module JSONAPI
 
       private def relationships
         return unless data
-        return {} unless data["relationships"].kind_of?(Hash)
+        return {} unless data["relationships"].is_a?(Hash)
 
         data
           .fetch("relationships")

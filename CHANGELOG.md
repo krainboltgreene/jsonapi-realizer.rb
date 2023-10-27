@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.2.4
+
+  - [bugfix] Catching a nasty case where if you `include` an empty string it would fail to parse.
+
 ## 6.2.3
 
   - [bugfix] The solution for bad values in `data.*` turned out to be not as explicit as a production application needs, so I've made it significantly more strict and also expanded it to `page.*` as well.

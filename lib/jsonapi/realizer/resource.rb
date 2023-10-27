@@ -126,7 +126,7 @@ module JSONAPI
       end
 
       def include?
-        parameters.key?("include") && parameters.fetch("include").respond_to?(:split)
+        parameters.key?("include") && parameters.fetch("include").respond_to?(:split) && parameters.fetch("include").split(/\s*,\s*/).any?
       end
 
       def includes
@@ -321,7 +321,7 @@ module JSONAPI
 
         relation_configuration = relation(name).realizer_class.configuration
 
-        if data.kind_of?(Array)
+        if data.is_a?(Array)
           [name, relation_configuration.adapter.find_many(relation_configuration.model_class, { id: data.map { |value| value.fetch("id") } })]
         else
           [name, relation_configuration.adapter.find_one(relation_configuration.model_class, data.fetch("id"))]
