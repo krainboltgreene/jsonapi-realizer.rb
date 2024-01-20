@@ -3,6 +3,12 @@
 This library handles incoming [json:api](https://www.jsonapi.org) payloads and turns them, via an adapter system, into native data models. While designed with rails in mind, this library doesn't require rails to use. I'm already using jsonapi-realizer and it's sister project jsonapi-materializer in a gem of that allows http json services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 
+- [ ] Detail include(JSONAPI::Realizer::Controller)
+- [ ] Basic ActionController::API
+- [ ] rescue_from JSONAPI::Realizer::Error::MissingAcceptHeader, with: :missing_accept_header
+- [ ] rescue_from JSONAPI::Realizer::Error::InvalidAcceptHeader, with: :invalid_accept_header
+
+
 ## Using
 
 In order to use this library you'll want to have some models:
