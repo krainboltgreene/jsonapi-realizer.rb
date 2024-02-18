@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.3.0
+
+  - [feature] Trying to include relationships that aren't defined now give you extra context on the fact that it was included
+  - [feature] Now parameters can be allowed to be blank
+
 ## 6.2.4
 
   - [bugfix] Catching a nasty case where if you `include` an empty string it would fail to parse.

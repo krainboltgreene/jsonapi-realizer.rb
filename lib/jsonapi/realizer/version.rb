@@ -2,6 +2,6 @@
 
 module JSONAPI
   module Realizer
-    VERSION = "6.2.4"
+    VERSION = "6.3.0"
   end
 end

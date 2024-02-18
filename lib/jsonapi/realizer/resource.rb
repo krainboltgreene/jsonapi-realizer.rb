@@ -27,8 +27,8 @@ module JSONAPI
         end
 
         validates_presence_of(:intent)
-        validates_presence_of(:parameters, allow_empty: true)
-        validates_presence_of(:headers, allow_empty: true)
+        validates_presence_of(:parameters, allow_empty: true, allow_blank: true)
+        validates_presence_of(:headers, allow_empty: true, allow_blank: true)
 
         identifier(JSONAPI::Realizer.configuration.default_identifier)
 
@@ -155,6 +155,8 @@ module JSONAPI
           end.first
         end
         # [["account", "photographs"], ["comments"], ["comments", "account"]]
+      rescue Error::ResourceRelationshipNotFound => _relationship_not_found
+        raise(Error::ResourceRelationshipNotFound, name:, materializer: self, key: "include")
       end
 
       def selects?

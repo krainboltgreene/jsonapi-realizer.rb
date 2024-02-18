@@ -6,9 +6,14 @@ module JSONAPI
       class ResourceRelationshipNotFound < Error
         attr_accessor(:name)
         attr_accessor(:realizer)
+        attr_accessor(:key)
 
         def message
-          "#{realizer} doesn't define the relationship #{name}"
+          if key
+            "#{realizer} doesn't define the relationship #{name} with #{key}"
+          else
+            "#{realizer} doesn't define the relationship #{name}"
+          end
         end
       end
     end
